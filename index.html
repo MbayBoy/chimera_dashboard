@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Chimera Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Chimera Email Infrastructure Dashboard" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Global error detection: catches JS errors before React loads -->
+  <script>
+    window.__CHIMERA_ERRORS__ = [];
+
+    window.addEventListener('error', function(e) {
+      console.error('[Chimera] Uncaught error:', e.message, 'at', e.filename, ':', e.lineno);
+      window.__CHIMERA_ERRORS__.push({ type: 'error', message: e.message, source: e.filename, line: e.lineno });
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('[Chimera] Unhandled promise rejection:', e.reason);
+      window.__CHIMERA_ERRORS__.push({ type: 'unhandledrejection', message: String(e.reason) });
+    });
+
+    // Log when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('[Chimera] DOM ready, waiting for React...');
+    });
+  </script>
+  </head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div class="dhiwise-code" id="root"></div>
+  <script type="module" src="/src/index.jsx"></script>
+</body>
+
+</html>
