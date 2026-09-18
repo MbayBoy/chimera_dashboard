@@ -1,0 +1,74 @@
+[
+  {
+    "name": "terminal-requests-ar-tablet",
+    "width": 1280,
+    "height": 800,
+    "language": "ar",
+    "screen": "requests",
+    "dir": "rtl",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-requests-ar-tablet.png"
+  },
+  {
+    "name": "terminal-requests-en-tablet",
+    "width": 1280,
+    "height": 800,
+    "language": "en",
+    "screen": "requests",
+    "dir": "ltr",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-requests-en-tablet.png"
+  },
+  {
+    "name": "terminal-requests-ar-phone",
+    "width": 390,
+    "height": 844,
+    "language": "ar",
+    "screen": "requests",
+    "dir": "rtl",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-requests-ar-phone.png"
+  },
+  {
+    "name": "terminal-requests-en-phone",
+    "width": 390,
+    "height": 844,
+    "language": "en",
+    "screen": "requests",
+    "dir": "ltr",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-requests-en-phone.png"
+  },
+  {
+    "name": "terminal-quote-ar-tablet",
+    "width": 1280,
+    "height": 800,
+    "language": "ar",
+    "screen": "quote",
+    "dir": "rtl",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-quote-ar-tablet.png"
+  },
+  {
+    "name": "terminal-quote-en-phone",
+    "width": 390,
+    "height": 844,
+    "language": "en",
+    "screen": "quote",
+    "dir": "ltr",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-quote-en-phone.png"
+  },
+  {
+    "name": "terminal-performance-ar-phone",
+    "width": 390,
+    "height": 844,
+    "language": "ar",
+    "screen": "performance",
+    "dir": "rtl",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-performance-ar-phone.png"
+  },
+  {
+    "name": "terminal-stock-en-tablet",
+    "width": 1280,
+    "height": 800,
+    "language": "en",
+    "screen": "stock",
+    "dir": "ltr",
+    "path": "/home/user/chimera_dashboard/ninety/docs/screenshots/terminal-stock-en-tablet.png"
+  }
+]

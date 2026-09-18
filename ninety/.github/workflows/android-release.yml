@@ -1,0 +1,86 @@
+name: Android release
+
+# Merge to main builds a production Android App Bundle and puts it on the
+# internal track. Everything after that is a deliberate human promotion:
+# internal → closed → production at 10%. An automatic path to production is a
+# way to ship a Friday regression to a whole market.
+
+on:
+  push:
+    branches: [main]
+    paths: ['ninety/apps/buyer/**', 'ninety/packages/shared/**']
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Build profile
+        required: true
+        default: production
+        type: choice
+        options: [preview, production]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ninety
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: ninety/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      # The app is built from the same shared package the API uses. A type error
+      # between them should fail here, not on a device.
+      - name: Typecheck
+        run: pnpm --filter @ninety/buyer typecheck
+
+      - name: Test
+        run: pnpm --filter @ninety/buyer test
+
+      # The data-safety declaration is a compliance statement about real
+      # behaviour. If a permission was added without updating it, stop.
+      - name: Data safety declaration matches the manifest
+        run: node scripts/check-data-safety.mjs
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android App Bundle
+        working-directory: ninety/apps/buyer
+        env:
+          APP_ENV: production
+          # Version code from the run number: monotonic, and never reused.
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+          API_BASE: ${{ vars.PRODUCTION_API_BASE }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+        run: eas build --platform android --profile ${{ inputs.profile || 'production' }} --non-interactive --wait
+
+      # Source maps, or a stack trace is a list of minified symbols and the
+      # crash dashboard is decorative.
+      - name: Upload source maps
+        working-directory: ninety/apps/buyer
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: npx sentry-expo-upload-sourcemaps dist || echo "no sourcemap step configured yet"
+
+      - name: Submit to the internal track
+        if: ${{ (inputs.profile || 'production') == 'production' }}
+        working-directory: ninety/apps/buyer
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+        run: |
+          echo "$GOOGLE_PLAY_SERVICE_ACCOUNT" > play-service-account.json
+          eas submit --platform android --profile production --non-interactive
+          rm -f play-service-account.json

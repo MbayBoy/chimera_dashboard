@@ -1,0 +1,262 @@
+/*
+ * The supplier terminal.
+ *
+ * Every rule here follows from one place: a cheap tablet on a counter in an
+ * industrial yard, operated in gloves, in poor light, by someone with fourteen
+ * other jobs. If responding takes more than ninety seconds they stop responding,
+ * fill rate collapses, and the business does not work.
+ *
+ *   - Minimum tap target 64px. Gloves are not precise.
+ *   - High contrast, large type, no thin weights. Dusty screens, bad light.
+ *   - No dropdowns, no wizards, no small controls. Typing is the enemy.
+ *   - Layout mirrors under RTL. Arabic is a launch language, not a translation.
+ */
+
+:root {
+  --tap: 64px;
+  --tap-large: 88px;
+
+  --ink: #0b0d10;
+  --surface: #14181d;
+  --surface-raised: #1c222a;
+  --line: #2b333d;
+
+  --text: #f7f9fb;
+  --text-dim: #a7b3c0;
+
+  --brand: #f5b700;
+  --brand-ink: #0b0d10;
+
+  --calm: #3ba55d;
+  --soon: #f5b700;
+  --urgent: #e5484d;
+
+  --radius: 14px;
+  --gap: 16px;
+
+  color-scheme: dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif;
+  /* Fluid, and large at every size: this is read at arm's length. */
+  font-size: clamp(17px, 1.6vw, 20px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  /* A mis-tap that selects text mid-quote wastes seconds. */
+  user-select: none;
+  overscroll-behavior: none;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+input, textarea { user-select: text; }
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+
+.app { display: flex; flex-direction: column; height: 100%; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--gap);
+  padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 10;
+}
+
+.brand { font-weight: 800; letter-spacing: 0.14em; font-size: 1.05rem; color: var(--brand); }
+
+.status { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dim); }
+.status .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--urgent); }
+.status.online .dot { background: var(--calm); }
+
+.score-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-raised); border: 1px solid var(--line);
+  border-radius: 999px; padding: 6px 14px; font-weight: 700;
+}
+
+.content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: var(--gap); }
+
+/* Bottom navigation: thumbs reach the bottom of a mounted tablet, not the top. */
+.tabs {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabs button {
+  min-height: var(--tap); border: 0; background: transparent; color: var(--text-dim);
+  font-size: 0.85rem; font-weight: 700; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px; cursor: pointer;
+}
+.tabs button[aria-current='page'] { color: var(--brand); background: var(--surface-raised); }
+.tabs .badge {
+  background: var(--urgent); color: #fff; border-radius: 999px;
+  min-width: 22px; padding: 0 6px; font-size: 0.75rem; line-height: 22px;
+}
+
+/* ── Job cards ──────────────────────────────────────────────────────────── */
+
+.jobs { display: flex; flex-direction: column; gap: var(--gap); }
+
+.job {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: var(--gap); display: flex; flex-direction: column; gap: 12px;
+}
+/* The border carries the urgency, so it reads from across a yard. */
+.job.soon { border-color: var(--soon); }
+.job.urgent { border-color: var(--urgent); box-shadow: 0 0 0 2px rgba(229, 72, 77, 0.25); }
+.job.expired { opacity: 0.45; }
+
+.job-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.job-ref { font-weight: 700; color: var(--text-dim); letter-spacing: 0.06em; }
+
+.countdown {
+  font-variant-numeric: tabular-nums; font-weight: 800;
+  font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1;
+  /* Latin digits in an RTL frame still read left to right. */
+  direction: ltr; unicode-bidi: isolate;
+}
+.countdown.calm { color: var(--calm); }
+.countdown.soon { color: var(--soon); }
+.countdown.urgent { color: var(--urgent); }
+.countdown.expired { color: var(--text-dim); }
+
+.job-vehicle { font-size: 1.25rem; font-weight: 700; }
+.job-part { font-size: 1.1rem; color: var(--text); }
+.job-meta { color: var(--text-dim); font-size: 0.95rem; }
+
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.thumb {
+  width: 84px; height: 84px; border-radius: 10px; object-fit: cover;
+  background: var(--surface-raised); border: 1px solid var(--line);
+}
+
+.job-actions { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+
+button, .btn {
+  min-height: var(--tap); border-radius: 12px; border: 1px solid var(--line);
+  font-size: 1.05rem; font-weight: 800; letter-spacing: 0.04em; cursor: pointer;
+  background: var(--surface-raised); color: var(--text);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 18px;
+}
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); min-height: var(--tap-large); }
+.btn-danger { background: transparent; color: var(--urgent); border-color: var(--urgent); }
+.btn-block { width: 100%; }
+.btn-huge { min-height: var(--tap-large); font-size: 1.2rem; }
+
+/* ── Quote screen ───────────────────────────────────────────────────────── */
+
+.quote { display: flex; flex-direction: column; gap: var(--gap); }
+
+.field { display: flex; flex-direction: column; gap: 10px; }
+.field-label { font-size: 0.9rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+
+/* Preset toggles rather than dropdowns: one tap, no scrolling list. */
+.toggles { display: flex; gap: 10px; flex-wrap: wrap; }
+.toggle {
+  flex: 1 1 0; min-width: 96px; min-height: var(--tap);
+  background: var(--surface); border: 2px solid var(--line); border-radius: 12px;
+  color: var(--text); font-weight: 700;
+}
+.toggle[aria-pressed='true'] { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+
+.price-display {
+  background: var(--surface); border: 2px solid var(--line); border-radius: 12px;
+  padding: 14px 18px; font-size: 2.4rem; font-weight: 800; text-align: center;
+  font-variant-numeric: tabular-nums; min-height: var(--tap-large);
+  direction: ltr; unicode-bidi: isolate;
+}
+.price-display:empty::before { content: '0'; color: var(--text-dim); }
+
+/*
+ * A numeric keypad, not a text field. Typing is the enemy.
+ *
+ * The grid stays left-to-right even in an RTL frame. Digits are read
+ * left-to-right in Arabic too, and every phone keypad an operator has ever used
+ * — including the Arabic ones — puts 1 at the top left. Mirroring it would be
+ * consistent with the layout and wrong for the hands.
+ */
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; direction: ltr; }
+.keypad button { min-height: var(--tap); font-size: 1.6rem; font-weight: 700; }
+
+.camera-button {
+  min-height: 120px; width: 100%; border: 2px dashed var(--line); background: var(--surface);
+  flex-direction: column; gap: 6px; font-size: 1.1rem;
+}
+.camera-hint { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); }
+
+textarea {
+  min-height: 96px; background: var(--surface); color: var(--text);
+  border: 2px solid var(--line); border-radius: 12px; padding: 14px;
+  font: inherit; font-size: 1rem; resize: vertical; width: 100%;
+}
+
+.payout { font-size: 1.1rem; font-weight: 700; color: var(--calm); text-align: center; }
+
+/* ── Banners ────────────────────────────────────────────────────────────── */
+
+.banner { border-radius: 12px; padding: 14px 16px; font-weight: 600; line-height: 1.45; }
+.banner-info { background: rgba(59, 165, 93, 0.14); border: 1px solid var(--calm); }
+.banner-warn { background: rgba(245, 183, 0, 0.14); border: 1px solid var(--soon); }
+.banner-error { background: rgba(229, 72, 77, 0.14); border: 1px solid var(--urgent); }
+.banner ul { margin: 8px 0 0; padding-inline-start: 20px; }
+
+.empty { text-align: center; color: var(--text-dim); padding: 48px 16px; }
+.empty h2 { color: var(--text); font-size: 1.3rem; }
+
+/* ── Performance ────────────────────────────────────────────────────────── */
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.stat-label { font-size: 0.85rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.stat-value { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.score-big { font-size: 3.4rem; color: var(--brand); }
+
+/* ── Right to left ──────────────────────────────────────────────────────── */
+
+/*
+ * RTL is layout, not translation. The whole frame mirrors: rows reverse, text
+ * aligns to the right, and directional glyphs flip. Arabic text is also
+ * typically taller, so line-height is given room rather than being tuned to
+ * Latin.
+ */
+[dir='rtl'] { text-align: right; }
+[dir='rtl'] .job-actions { direction: rtl; }
+[dir='rtl'] .icon-back { transform: scaleX(-1); }
+[dir='rtl'] body { letter-spacing: 0; }
+[dir='rtl'] .brand { letter-spacing: 0; }
+[dir='rtl'] .field-label { letter-spacing: 0; }
+[dir='rtl'] .stat-label { letter-spacing: 0; }
+[dir='rtl'] .empty, [dir='rtl'] .payout, [dir='rtl'] .price-display { text-align: center; }
+
+/* ── Motion ─────────────────────────────────────────────────────────────── */
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.job.urgent .countdown { animation: pulse 1s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* A tablet mounted in landscape: two columns of jobs rather than one long list. */
+@media (min-width: 900px) {
+  .jobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+  .content { padding: 24px; }
+}
+
+/* The explanation under a contact-details rejection. Smaller than the refusal
+   itself, but present: the rule only holds if the yard understands it. */
+.banner-why {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.85;
+}
