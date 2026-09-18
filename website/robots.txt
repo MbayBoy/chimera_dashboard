@@ -1,0 +1,7 @@
+# Ni90ty
+User-agent: *
+Allow: /
+Disallow: /contact.php
+Disallow: /thank-you.html
+
+Sitemap: https://ni90ty.com/sitemap.xml

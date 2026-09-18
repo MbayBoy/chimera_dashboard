@@ -1,0 +1,147 @@
+# ===================================================================
+# Ni90ty — Apache / LiteSpeed configuration for Hostinger shared hosting
+#
+# Upload this file into public_html alongside index.html. Hostinger runs
+# LiteSpeed, which reads .htaccess, so everything below applies without
+# any panel configuration.
+#
+# If a rule causes a 500 error on your plan, comment out that block
+# rather than deleting the file — the most likely candidate is the
+# compression or the caching section, depending on which modules your
+# plan has enabled.
+# ===================================================================
+
+# ---- default document ---------------------------------------------
+DirectoryIndex index.html
+
+# ---- error pages ---------------------------------------------------
+ErrorDocument 404 /404.html
+
+# ---- character set --------------------------------------------------
+AddDefaultCharset UTF-8
+
+<IfModule mod_mime.c>
+  AddType image/svg+xml            .svg
+  AddType font/woff2               .woff2
+  AddType application/manifest+json .webmanifest
+</IfModule>
+
+# ===================================================================
+# Clean URLs
+# /how-it-works  serves  /how-it-works.html
+# ===================================================================
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Force HTTPS. Comment this out until your SSL certificate is issued,
+  # or you will lock yourself out of the site while it provisions.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # Canonical host. Uncomment ONE of these two blocks once you have
+  # decided whether the site lives on the bare domain or on www.
+  #
+  # Bare domain (ni90ty.com):
+  # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  # RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+  #
+  # www (www.ni90ty.com):
+  # RewriteCond %{HTTP_HOST} !^www\. [NC]
+  # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
+
+  # Strip a trailing slash from anything that is not a real directory
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # Send /page to /page.html when that file exists, so both /how-it-works
+  # and /how-it-works.html resolve. The pages link to each other with the
+  # .html form so that the site also works opened straight off disk or on
+  # a host without mod_rewrite; each page carries a <link rel="canonical">
+  # naming the single address search engines should index, so no redirect
+  # is needed here and no internal link costs a round trip.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+  RewriteRule ^(.+?)/?$ /$1.html [L]
+</IfModule>
+
+# ===================================================================
+# Compression
+# ===================================================================
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml application/rss+xml
+  AddOutputFilterByType DEFLATE image/svg+xml application/manifest+json
+  # woff2 is already compressed; compressing it again wastes CPU
+</IfModule>
+
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript image/svg+xml
+</IfModule>
+
+# ===================================================================
+# Caching
+#
+# The fonts, icons and stylesheet are content-stable, so they are cached
+# hard. HTML is not, so a copy edit goes live the moment you re-upload.
+# ===================================================================
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault                        "access plus 1 month"
+  ExpiresByType text/html               "access plus 0 seconds"
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType font/woff2              "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 year"
+  ExpiresByType image/png               "access plus 1 year"
+  ExpiresByType image/x-icon            "access plus 1 year"
+  ExpiresByType application/manifest+json "access plus 1 week"
+  ExpiresByType text/xml                "access plus 1 day"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|woff2|svg|png|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(html|php)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # ---- security headers -------------------------------------------
+  # The site loads no third-party script, style, font or image, so the
+  # policy can be strict. The 'unsafe-inline' on style-src covers the
+  # small number of inline style attributes used for specimen grounds.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  # Enable HSTS only once HTTPS is working and you are sure of it. It is
+  # hard to undo: browsers remember it for the max-age you declare.
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+  Header unset X-Powered-By
+  Header always unset X-Powered-By
+</IfModule>
+
+# ===================================================================
+# Hardening
+# ===================================================================
+Options -Indexes
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+<Files "contact-log.txt">
+  Require all denied
+</Files>
+
+<IfModule mod_rewrite.c>
+  # Block direct access to the mail log even if the Files rule above is
+  # not honoured by the server's configuration
+  RewriteRule ^contact-log\.txt$ - [F,L]
+</IfModule>

@@ -1,0 +1,571 @@
+@import url('fonts.css');
+
+/* ==================================================================
+   Ni90ty — site stylesheet
+   Written to the corporate identity manual, volume one.
+
+   The rules this file exists to hold:
+     §06  Ninety-five percent of every surface is paper and text ink.
+          Cyan is the only interactive colour and the colour of the clock.
+          Magenta appears rarely, and never in the same small component
+          as cyan.
+     §07  One family, Source Serif 4. No second face, no sans-serif for
+          UI. Flush left, ragged right. Measure caps at 70 characters.
+          15 px minimum on screen.
+     §09  No boxes for layout — space and a hairline, not cards. The one
+          filled shape on the screen is the action.
+     §05  No gradients, shadows, outlines, pills or containers.
+     §15  Layout flips for right-to-left. The mark does not.
+   ================================================================== */
+
+/* ---------- ink (§06) -------------------------------------------- */
+
+:root {
+  --paper:        #F3F2F2;   /* the default ground */
+  --ink:          #201E1D;   /* all body copy, rules and the ring */
+  --cyan:         #0088B0;   /* the clock, actions, live states */
+  --magenta:      #D6006C;   /* expiry, failure, the empty result */
+
+  /* tonal steps: light for tinted fills and hovers, the base for the
+     mark and for actions, dark for text set in colour. Paragraph-size
+     type in cyan always uses the deep step, never the base. */
+  --cyan-light:   #DCEEF5;
+  --cyan-mid:     #7FC4DC;
+  --cyan-deep:    #00607C;
+  --magenta-deep: #A3004F;
+
+  --ink-04:       #EAE9E8;
+  --ink-12:       #DCDAD9;
+  --ink-30:       #B4B1AF;
+  --ink-55:       #6B6764;
+  --ink-75:       #4B4744;
+
+  --rule-thick:   3px;
+  --rule-thin:    1px;
+
+  --measure:      70ch;      /* §07: body measure caps at 70 characters */
+  --gutter:       clamp(1.25rem, 5vw, 4.5rem);
+  --page:         74rem;
+
+  --step:         clamp(3rem, 7vw, 5.5rem);   /* vertical rhythm between sections */
+
+  color-scheme: light;
+}
+
+/* ---------- reset ------------------------------------------------ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-size: 1.0625rem;          /* 17 px — above the 15 px screen minimum */
+  line-height: 1.62;
+  text-align: start;             /* §07: flush left, ragged right */
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg { max-width: 100%; height: auto; }
+svg { display: block; }
+
+/* ---------- type (§07) ------------------------------------------- */
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  margin: 0 0 .6em;
+  text-wrap: balance;
+}
+
+h1 { font-size: clamp(2.5rem, 6.2vw, 4.25rem); letter-spacing: -0.021em; }
+h2 { font-size: clamp(1.85rem, 3.6vw, 2.6rem);  letter-spacing: -0.016em; }
+h3 { font-size: clamp(1.2rem, 1.8vw, 1.4rem); line-height: 1.28; }
+h4 { font-size: 1.0625rem; }
+
+p, ul, ol, dl { margin: 0 0 1.15em; max-width: var(--measure); }
+p:last-child, ul:last-child, ol:last-child { margin-bottom: 0; }
+
+.lede {
+  font-size: clamp(1.2rem, 2.1vw, 1.5rem);
+  line-height: 1.46;
+  max-width: 38ch;
+}
+
+/* §07: the true italic marks the sentence that tells someone something
+   did not happen. It is never used for emphasis inside a paragraph. */
+.consequence {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-75);
+  max-width: 54ch;
+}
+
+/* §07: labels — small, letterspaced, never below the screen minimum */
+.label {
+  font-size: .9375rem;           /* 15 px */
+  line-height: 1.35;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+  margin: 0 0 1rem;
+  font-weight: 400;
+}
+.label--ink { color: var(--ink); }
+
+/* §07: numbers carry the brand. Times, prices and counters are set at
+   display weight and size, larger than the copy around them. */
+.figure {
+  font-size: clamp(3.25rem, 8vw, 5rem);
+  font-weight: 600;
+  line-height: .92;
+  letter-spacing: -0.03em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--cyan);
+  display: block;
+}
+.figure--ink { color: var(--ink); }
+
+strong, b { font-weight: 600; }
+
+/* links: paragraph-size type in cyan always uses the deep step (§06) */
+a {
+  color: var(--cyan-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .18em;
+  text-decoration-color: var(--cyan-mid);
+}
+a:hover, a:focus-visible { text-decoration-color: currentColor; }
+
+:focus-visible {
+  outline: 2px solid var(--cyan-deep);
+  outline-offset: 3px;
+}
+
+hr {
+  border: 0;
+  border-top: var(--rule-thin) solid var(--ink-12);
+  margin: var(--step) 0;
+}
+
+/* ---------- layout ----------------------------------------------- */
+
+.wrap {
+  width: 100%;
+  max-width: var(--page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section { padding-block: var(--step); }
+.section + .section { padding-block-start: 0; }
+
+/* §13: the rule pair is the format. Every document opens the same way:
+   lockup, thick rule, a three-field rail in small caps, thin rule. */
+.rule-thick { border: 0; border-top: var(--rule-thick) solid var(--ink); margin: 0; }
+.rule-thin  { border: 0; border-top: var(--rule-thin)  solid var(--ink-30); margin: 0; }
+
+.rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 2.5rem;
+  padding-block: .7rem;
+  font-size: .9375rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+.rail > * { margin: 0; }
+.rail > :last-child { margin-inline-start: auto; }
+@media (max-width: 48rem) {
+  .rail { gap: .25rem 1.5rem; }
+  .rail > :last-child { margin-inline-start: 0; }
+}
+
+/* columns, separated by space — never by cards (§09) */
+.cols {
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 3.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  align-items: start;
+}
+.cols--2 { grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+.cols--3 { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.cols p, .cols ul, .cols ol { max-width: 46ch; }
+
+.split {
+  display: grid;
+  gap: clamp(1.75rem, 5vw, 4.5rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 60rem) {
+  .split { grid-template-columns: minmax(0, 7fr) minmax(0, 9fr); }
+  .split--even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* the three promise figures (§01) — divided by hairlines, not boxed */
+.promise {
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+.promise > div {
+  padding-inline: clamp(1rem, 3vw, 2.25rem);
+  padding-block: .35rem 0;
+  border-inline-start: var(--rule-thin) solid var(--ink-12);
+}
+.promise > div:first-child { padding-inline-start: 0; border-inline-start: 0; }
+.promise p { font-size: 1rem; max-width: 26ch; margin-block-start: .85rem; }
+
+/* stacked, the dividing hairline turns from a vertical rule into a
+   horizontal one -- a rule between them either way, never a box */
+@media (max-width: 42rem) {
+  .promise > div {
+    padding-inline: 0;
+    padding-block: 1.5rem 0;
+    border-inline-start: 0;
+    border-block-start: var(--rule-thin) solid var(--ink-12);
+  }
+  .promise > div:first-child { padding-block-start: .35rem; border-block-start: 0; }
+  .promise p { max-width: var(--measure); }
+}
+
+/* ---------- the mark --------------------------------------------- */
+
+/* §04: clear space on all four sides equals the outside diameter of the
+   dial. The dial is 1/5.4 of the lockup width, so 18.5% of the width
+   on each side reproduces one diameter of clear space. */
+.lockup { display: inline-block; line-height: 0; }
+.lockup img { width: var(--lockup-w, 150px); }
+.lockup--clear { padding: calc(var(--lockup-w, 150px) * .185); }
+
+/* ---------- the one filled shape: the action (§09) --------------- */
+
+.action {
+  display: inline-block;
+  background: var(--cyan);
+  color: #FFFFFF;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: .95rem 1.7rem;
+  border: 0;
+  border-radius: 0;           /* §05: no pills */
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .12s linear;
+}
+.action:hover, .action:focus-visible { background: var(--cyan-deep); text-decoration: none; }
+.action[disabled] { background: var(--ink-30); cursor: not-allowed; }
+
+/* a second call to action is a text link with a rule under it, never a
+   second filled shape on the same view */
+.action-quiet {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--cyan-deep);
+  text-decoration: none;
+  border-bottom: 2px solid var(--cyan-mid);
+  padding-block-end: .15rem;
+}
+.action-quiet:hover, .action-quiet:focus-visible { border-bottom-color: var(--cyan-deep); }
+
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.1rem 2rem; margin-block-start: 2rem; }
+
+/* ---------- masthead --------------------------------------------- */
+
+.masthead { padding-block-start: clamp(1.25rem, 3vw, 2rem); }
+.masthead__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+  padding-block-end: calc(150px * .185);   /* one dial diameter of clear space */
+}
+.masthead__bar .lockup { align-self: center; }
+
+.nav { display: flex; flex-wrap: wrap; gap: .3rem 1.6rem; }
+.nav a {
+  font-size: 1rem;
+  color: var(--ink);
+  text-decoration: none;
+  padding-block: .3rem;
+  border-bottom: 2px solid transparent;
+}
+.nav a:hover, .nav a:focus-visible { border-bottom-color: var(--cyan); }
+.nav a[aria-current="page"] { border-bottom-color: var(--ink); font-weight: 600; }
+
+.nav-toggle { display: none; }
+
+@media (max-width: 47.99rem) {
+  .nav-toggle {
+    display: inline-block;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid var(--ink);
+    padding: .2rem 0;
+    font: inherit;
+    font-size: .9375rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .nav {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    padding-block: .5rem;
+  }
+  .nav[data-open="true"] { display: flex; }
+  .nav a { padding-block: .7rem; border-bottom: var(--rule-thin) solid var(--ink-12); }
+  .nav a:hover, .nav a:focus-visible { border-bottom-color: var(--cyan); }
+}
+
+/* ---------- the clock, as it appears on this site ---------------- */
+
+/* §06: running — cyan, with the elapsed portion solid and the remainder
+   at the light step. This is a static illustration of the product; it is
+   not a live countdown, so nothing animates. */
+.clock-bar {
+  height: 10px;
+  background: var(--cyan-light);
+  margin-block: 1rem 0;
+  max-width: 22rem;
+}
+.clock-bar > span { display: block; height: 100%; background: var(--cyan); }
+
+/* the empty result is a first-class screen (§09): magenta, used once,
+   and never alongside cyan in the same component */
+.empty-result { border-inline-start: var(--rule-thick) solid var(--magenta); padding-inline-start: 1.5rem; }
+.empty-result .label { color: var(--magenta-deep); }
+
+/* ---------- specimens: the two product screens ------------------- */
+
+/* A quiet tinted panel is allowed as a specimen ground, exactly as the
+   identity manual itself uses one. It is a frame around a picture of the
+   product, not a card around page content. */
+.screen {
+  background: #EDECEB;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  max-width: 24rem;
+}
+.screen--terminal { background: var(--cyan); color: #FFFFFF; }
+.screen__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block-end: 1.6rem;
+}
+.screen__head .lockup img { width: 86px; }
+.screen__ref { font-size: .9375rem; color: var(--ink-55); }
+.screen .label { margin-block-end: .5rem; }
+.screen__clock {
+  font-size: 3.6rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums tabular-nums;
+  margin: 0;
+}
+.screen__offer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: .9rem;
+  border-block-start: var(--rule-thin) solid var(--ink-30);
+}
+.screen__offer:first-of-type { border-block-start: 0; }
+.screen__offer strong { font-weight: 600; }
+.screen__offer span { font-size: .9375rem; color: var(--ink-55); display: block; font-weight: 400; }
+.screen__price { font-size: 1.5rem; font-weight: 600; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+.screen__note { font-size: .9375rem; color: var(--ink-55); margin-block-start: 1rem; }
+.screen .action { width: 100%; text-align: center; margin-block-start: 1.4rem; }
+
+/* terminal specimen — the one place the brand inverts into a full
+   colour field (§10). White ink, largest type in the system. */
+.screen--terminal .label,
+.screen--terminal .screen__ref,
+.screen--terminal .screen__note { color: #FFFFFF; }
+.screen--terminal .screen__clock { font-size: 4rem; }
+.screen--terminal h3 { font-size: 1.5rem; margin-block-end: .2rem; }
+.screen--terminal .screen__head { align-items: baseline; }
+.screen--terminal .screen__head .label { flex: 1 1 auto; }
+.screen--terminal .screen__ref { white-space: nowrap; }
+.screen--terminal .screen__actions { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-block-start: 1.6rem; }
+.screen--terminal .screen__actions > * {
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.125rem;
+  border: 2px solid #FFFFFF;
+}
+.screen--terminal .screen__actions .is-primary { background: #FFFFFF; color: var(--cyan-deep); }
+
+/* ---------- lists ------------------------------------------------ */
+
+.list-plain { list-style: none; padding: 0; }
+.list-plain li { padding-block: .85rem; border-block-start: var(--rule-thin) solid var(--ink-12); }
+.list-plain li:first-child { border-block-start: 0; }
+
+.list-marked { padding-inline-start: 1.1em; }
+.list-marked li { margin-block-end: .5em; max-width: var(--measure); }
+.list-marked li::marker { color: var(--ink-30); }
+
+/* numbered steps — the figure carries the number (§07) */
+.steps { list-style: none; padding: 0; counter-reset: step; display: grid; gap: 0; max-width: 46rem; }
+.steps > li {
+  counter-increment: step;
+  display: grid;
+  gap: .4rem 1.4rem;
+  grid-template-columns: 2.4rem minmax(0, 1fr);
+  padding-block: 1.6rem;
+  border-block-start: var(--rule-thin) solid var(--ink-12);
+}
+.steps > li:first-child { border-block-start: 0; padding-block-start: 0; }
+.steps > li::before {
+  content: counter(step, decimal-leading-zero);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--cyan);
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.3;
+}
+.steps h3 { margin-block-end: .35rem; }
+@media (max-width: 34rem) {
+  .steps > li { grid-template-columns: minmax(0, 1fr); gap: .35rem; }
+}
+
+/* ---------- tables ----------------------------------------------- */
+
+.table-scroll { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+  font-size: 1rem;
+}
+caption { text-align: start; color: var(--ink-55); font-size: .9375rem; padding-block-end: .8rem; }
+th, td {
+  text-align: start;
+  padding: .85rem 1.5rem .85rem 0;
+  border-block-end: var(--rule-thin) solid var(--ink-12);
+  vertical-align: top;
+}
+thead th {
+  font-weight: 600;
+  border-block-end: var(--rule-thick) solid var(--ink);
+  white-space: nowrap;
+}
+tbody tr:last-child th, tbody tr:last-child td { border-block-end: 0; }
+td .label { margin: 0; }
+
+/* ---------- forms ------------------------------------------------ */
+
+.field { margin-block-end: 1.4rem; max-width: 34rem; }
+.field label {
+  display: block;
+  font-size: .9375rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+  margin-block-end: .45rem;
+}
+.field input, .field select, .field textarea {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 1.0625rem;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-block-end: 2px solid var(--ink-30);   /* a rule, not a container (§05) */
+  border-radius: 0;
+  padding: .55rem 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.field select {
+  background-image: linear-gradient(transparent, transparent);   /* no native chrome */
+  padding-inline-end: 1.5rem;
+}
+.field textarea { min-height: 7rem; resize: vertical; line-height: 1.5; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: 0;
+  border-block-end-color: var(--cyan);
+}
+.field .hint { font-size: .9375rem; color: var(--ink-55); margin-block-start: .4rem; }
+.field--inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0 1.5rem; max-width: 34rem; }
+
+.form-note { font-size: .9375rem; color: var(--ink-55); max-width: 46ch; margin-block-start: 1.25rem; }
+
+/* ---------- footer ----------------------------------------------- */
+
+.footer { margin-block-start: var(--step); padding-block-end: clamp(2rem, 5vw, 3.5rem); }
+.footer__cols { display: grid; gap: 1.75rem 3rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); padding-block: 2rem; }
+.footer ul { list-style: none; padding: 0; margin: 0; }
+.footer li { margin-block-end: .5rem; }
+.footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink-12); }
+.footer a:hover, .footer a:focus-visible { border-bottom-color: var(--cyan); }
+.footer__fine { font-size: .9375rem; color: var(--ink-55); padding-block-start: 1.1rem; }
+.footer__fine p { max-width: 62ch; }
+
+/* ---------- utilities -------------------------------------------- */
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: absolute; inset-inline-start: -9999px; top: 0;
+  background: var(--ink); color: var(--paper);
+  padding: .75rem 1.25rem; z-index: 10; text-decoration: none;
+}
+.skip-link:focus { inset-inline-start: 0; }
+
+.muted { color: var(--ink-55); }
+.tight { margin-block-end: .4em; }
+.stack > * + * { margin-block-start: 1.15em; }
+.mt-0 { margin-block-start: 0; }
+.measure-narrow { max-width: 46ch; }
+
+/* ---------- right-to-left (§15) ----------------------------------- */
+
+/* Layout flips: reading order, alignment, rails and progress fills.
+   What does not flip: the wordmark, the dial and the hands. Numerals
+   stay Western in both markets. Logical properties do the work above;
+   these are the exceptions. */
+[dir="rtl"] .lockup img { transform: none; }
+[dir="rtl"] .figure,
+[dir="rtl"] .screen__clock,
+[dir="rtl"] .screen__price { direction: ltr; unicode-bidi: embed; }
+
+/* ---------- print ------------------------------------------------ */
+
+@media print {
+  :root { --paper: #FFFFFF; }
+  body { font-size: 11pt; }
+  .nav, .nav-toggle, .action, .skip-link { display: none !important; }
+  a { color: var(--ink); text-decoration: none; }
+  .section { padding-block: 1.2rem; }
+}
