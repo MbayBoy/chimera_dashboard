@@ -1,0 +1,36 @@
+# Local infrastructure.
+#
+# PostgreSQL with PostGIS and Redis, on the ports .env.example expects.
+# PostGIS is not optional: geo radius matching is the core of the product, and a
+# plain POINT column returns degrees where the matching engine expects metres —
+# numbers that look plausible and are wrong.
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: ninety
+      POSTGRES_PASSWORD: ninety
+      POSTGRES_DB: ninety
+    ports: ['5432:5432']
+    volumes: ['dbdata:/var/lib/postgresql/data']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ninety -d ninety']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    # The 15-minute clock lives in this process. Persistence is off because every
+    # timer is reconstructible from the database by the reconciliation sweep, and
+    # an fsync stall on the queue would delay the one thing that must not be late.
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    ports: ['6379:6379']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  dbdata:

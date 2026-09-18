@@ -1,0 +1,37 @@
+{
+  "name": "ninety",
+  "private": true,
+  "version": "0.1.0",
+  "description": "NINETY \u2014 reverse marketplace for second-hand car parts. Multi-market platform: API, supplier terminal PWA, admin console, Android buyer app.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @ninety/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "guard": "pnpm --filter @ninety/config test",
+    "db:migrate": "pnpm --filter @ninety/api db:migrate",
+    "db:seed": "pnpm --filter @ninety/api db:seed",
+    "bootstrap": "pnpm --filter @ninety/api bootstrap"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.17.0",
+    "eslint": "9.17.0",
+    "tsx": "4.19.2",
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.18.2",
+    "vitest": "2.1.8"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "msgpackr-extract"
+    ]
+  },
+  "type": "module"
+}
