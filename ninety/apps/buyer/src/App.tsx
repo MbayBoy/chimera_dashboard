@@ -11,7 +11,7 @@ import { WaitingScreen } from './screens/WaitingScreen.js';
 import { AcceptScreen } from './screens/AcceptScreen.js';
 import { TrackingScreen } from './screens/TrackingScreen.js';
 import { colors, styles } from './lib/theme.js';
-import { isRtlLanguage, languageForLocale, localeFor, translate, type Language } from './lib/i18n.js';
+import { isRtlLanguage, languageForLocale, localeFor, setMarketLocales, translate, type Language } from './lib/i18n.js';
 import { checkVersion } from './lib/version.js';
 import { request, type BuyerOffer, type BuyerSession, type ClientOptions } from './lib/api.js';
 
@@ -39,7 +39,15 @@ const extra = (Constants.expoConfig?.extra ?? {}) as {
 };
 
 const API_BASE = extra.apiBase ?? 'http://10.0.2.2:3000';
-const MARKET_CODE = extra.marketCode ?? 'AE';
+/**
+ * The market this build is pinned to, if the build pins one.
+ *
+ * Defaulting to a country here is how one application becomes two: the same
+ * binary would announce itself as being in the wrong market the moment it is
+ * shipped anywhere else. When nothing is pinned, the live markets are read from
+ * the server before sign-in.
+ */
+const PINNED_MARKET_CODE: string | undefined = extra.marketCode;
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 const SESSION_KEY = 'ninety.buyer.session';
 const LANGUAGE_KEY = 'ninety.buyer.language';
@@ -209,15 +217,36 @@ function SignIn({
   const [code, setCode] = useState('');
   const [stage, setStage] = useState<'phone' | 'code'>('phone');
   const [error, setError] = useState<string | null>(null);
+  const [marketCode, setMarketCode] = useState<string | null>(PINNED_MARKET_CODE ?? null);
 
   const client: ClientOptions = { apiBase: API_BASE, locale: localeFor(language) };
+
+  // Which market, and what its locales are, before anybody types a number.
+  useEffect(() => {
+    if (PINNED_MARKET_CODE !== undefined) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const body = await request<{ markets: { code: string; locales: string[] }[] }>(client, '/v1/markets');
+        if (cancelled || body.markets.length === 0) return;
+        setMarketLocales(body.markets[0]!.locales);
+        setMarketCode(body.markets[0]!.code);
+      } catch {
+        // Offline at start-up. Retried when the screen is next opened.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const send = async () => {
     setError(null);
     try {
       await request(client, '/v1/auth/otp/request', {
         method: 'POST',
-        body: { marketCode: MARKET_CODE, phone, locale: localeFor(language) },
+        body: { marketCode, phone, locale: localeFor(language) },
       });
       setStage('code');
     } catch (err) {
@@ -234,7 +263,7 @@ function SignIn({
         user: { locale: string; rtl: boolean };
       }>(client, '/v1/auth/otp/verify', {
         method: 'POST',
-        body: { marketCode: MARKET_CODE, phone, code, role: 'buyer', locale: localeFor(language) },
+        body: { marketCode, phone, code, role: 'buyer', locale: localeFor(language) },
       });
       // Currency, SLA, vehicle identifier and address model all come from the
       // server. None of them is a constant in this app.

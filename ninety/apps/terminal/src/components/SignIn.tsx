@@ -1,22 +1,28 @@
 import { useState } from 'react';
-import { apiFetch, ApiError, fetchMe, saveSession, type Session } from '../lib/api.js';
-import { translate, type Language } from '../lib/i18n.js';
+import { apiFetch, ApiError, fetchMe, saveSession, type MarketSummary, type Session } from '../lib/api.js';
+import { localeFor, translate, type Language } from '../lib/i18n.js';
 
 /**
  * Sign-in.
  *
  * Phone OTP, because the person at the counter has a phone and may not have an
- * email address. The market code is baked into the build per deployment rather
- * than asked for: a yard should not have to know what a market code is.
+ * email address. A yard should never have to know what a market code is, so it
+ * is resolved for them: the deployment may pin one with VITE_MARKET_CODE, and
+ * otherwise the server's list of live markets decides. Writing "AE" here as a
+ * default is how the same application ends up needing a separate build per
+ * country.
  */
-const MARKET_CODE = (import.meta.env.VITE_MARKET_CODE as string | undefined) ?? 'AE';
+const PINNED_MARKET_CODE = import.meta.env.VITE_MARKET_CODE as string | undefined;
 
 export function SignIn({
   language,
+  market,
   onLanguage,
   onSignedIn,
 }: {
   language: Language;
+  /** The live market this terminal is in, once the server has said. */
+  market: MarketSummary | null;
   onLanguage: (next: Language) => void;
   onSignedIn: (session: Session) => void;
 }): JSX.Element {
@@ -27,7 +33,8 @@ export function SignIn({
   const [error, setError] = useState<string | null>(null);
   const [devCode, setDevCode] = useState<string | null>(null);
 
-  const locale = language === 'ar' ? 'ar-AE' : 'en-AE';
+  const locale = localeFor(language);
+  const marketCode = PINNED_MARKET_CODE ?? market?.code ?? null;
   const t = (key: string, params?: Record<string, string | number>) => translate(language, key, params);
 
   const requestCode = async () => {
@@ -37,7 +44,7 @@ export function SignIn({
       const result = await apiFetch<{ devCode?: string }>('/v1/auth/otp/request', {
         method: 'POST',
         locale,
-        body: { marketCode: MARKET_CODE, phone, locale },
+        body: { marketCode, phone, locale },
       });
       setDevCode(result.devCode ?? null);
       setStage('code');
@@ -59,7 +66,7 @@ export function SignIn({
       }>('/v1/auth/otp/verify', {
         method: 'POST',
         locale,
-        body: { marketCode: MARKET_CODE, phone, code, role: 'supplier', locale },
+        body: { marketCode, phone, code, role: 'supplier', locale },
       });
       // The currency, the minor-unit exponent and this yard's commission rate
       // all come from the server. None of them is a constant in client code.
@@ -110,9 +117,17 @@ export function SignIn({
                 style={{ fontSize: '1.6rem' }}
               />
             </div>
-            <button className="btn-primary btn-block btn-huge" onClick={requestCode} disabled={busy || phone.length < 6}>
+            {/* Until the server has said which market this terminal is in,
+                there is nothing to send a code against. Better a disabled
+                button with a reason than a request that fails validation. */}
+            <button
+              className="btn-primary btn-block btn-huge"
+              onClick={requestCode}
+              disabled={busy || phone.length < 6 || marketCode === null}
+            >
               {t('signin.sendCode')}
             </button>
+            {marketCode === null && <div className="banner banner-warn">{t('signin.connecting')}</div>}
           </>
         ) : (
           <>
@@ -122,7 +137,7 @@ export function SignIn({
             {devCode !== null && <div className="banner banner-warn">dev code: {devCode}</div>}
             <div className="field">
               <label className="field-label" htmlFor="code">
-                {t('signin.code')}
+                {t('signin.code', { digits: 6 })}
               </label>
               <input
                 id="code"

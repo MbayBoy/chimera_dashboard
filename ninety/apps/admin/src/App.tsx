@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Board } from './components/Board.js';
 import { Metrics } from './components/Metrics.js';
 import { Suppliers } from './components/Suppliers.js';
@@ -9,7 +9,14 @@ import { api, clearSession, loadSession, saveSession, type AdminSession } from '
 
 type View = 'board' | 'metrics' | 'suppliers' | 'demand' | 'markets' | 'disputes';
 
-const MARKET_CODE = (import.meta.env.VITE_MARKET_CODE as string | undefined) ?? 'AE';
+/**
+ * The market the console opens on.
+ *
+ * Pinned per deployment where there is one; otherwise the first live market the
+ * server reports. A country written in here is a country the console shows to
+ * an operator who works in a different one.
+ */
+const PINNED_MARKET_CODE = import.meta.env.VITE_MARKET_CODE as string | undefined;
 
 export function App(): JSX.Element {
   const [session, setSession] = useState<AdminSession | null>(() => loadSession());
@@ -65,13 +72,26 @@ function SignIn({ onSignedIn }: { onSignedIn: (session: AdminSession) => void })
   const [stage, setStage] = useState<'phone' | 'code'>('phone');
   const [error, setError] = useState<string | null>(null);
   const [devCode, setDevCode] = useState<string | null>(null);
+  const [marketCode, setMarketCode] = useState<string | null>(PINNED_MARKET_CODE ?? null);
+
+  useEffect(() => {
+    if (PINNED_MARKET_CODE !== undefined) return;
+    void (async () => {
+      try {
+        const body = await api<{ markets: { code: string }[] }>('/v1/markets');
+        if (body.markets.length > 0) setMarketCode(body.markets[0]!.code);
+      } catch {
+        setError('could not reach the API');
+      }
+    })();
+  }, []);
 
   const request = async () => {
     setError(null);
     try {
       const result = await api<{ devCode?: string }>('/v1/auth/otp/request', {
         method: 'POST',
-        body: { marketCode: MARKET_CODE, phone },
+        body: { marketCode, phone },
       });
       setDevCode(result.devCode ?? null);
       setStage('code');
@@ -85,7 +105,7 @@ function SignIn({ onSignedIn }: { onSignedIn: (session: AdminSession) => void })
     try {
       const result = await api<{ accessToken: string; refreshToken: string; user: { displayName: string | null } }>(
         '/v1/auth/otp/verify',
-        { method: 'POST', body: { marketCode: MARKET_CODE, phone, code, role: 'admin' } },
+        { method: 'POST', body: { marketCode, phone, code, role: 'admin' } },
       );
       const session: AdminSession = {
         accessToken: result.accessToken,
@@ -115,7 +135,7 @@ function SignIn({ onSignedIn }: { onSignedIn: (session: AdminSession) => void })
               <label htmlFor="phone">Phone</label>
               <input id="phone" type="text" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
-            <button className="action" onClick={() => void request()}>
+            <button className="action" onClick={() => void request()} disabled={marketCode === null}>
               Send code
             </button>
           </>

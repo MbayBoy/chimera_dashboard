@@ -4,6 +4,7 @@ import {
   authenticate,
   bearer,
   buildTestServer,
+  clearPingBudgets,
   clearRateLimits,
   freshClientAddress,
   SEED_PHONES,
@@ -80,6 +81,7 @@ describe('anonymity across every buyer-facing endpoint', () => {
   beforeAll(async () => {
     app = await buildTestServer();
     await clearRateLimits();
+    await clearPingBudgets();
     buyer = await authenticate(app, { phone: SEED_PHONES.buyer(4), role: 'buyer', locale: 'en-AE' });
     for (let i = 1; i <= 6; i++) {
       suppliers.push(await authenticate(app, { phone: SEED_PHONES.supplier(i), role: 'supplier', locale: 'en-AE' }));

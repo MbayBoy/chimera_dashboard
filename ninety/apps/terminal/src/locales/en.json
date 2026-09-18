@@ -1,15 +1,22 @@
 {
-  "app": { "name": "NINETY", "online": "Online", "offline": "Offline", "reconnecting": "Reconnecting…", "clockDrift": "This tablet's clock is {{minutes}} min out. Countdowns use ours." },
+  "app": {
+    "name": "NINETY",
+    "online": "Online",
+    "offline": "Offline",
+    "reconnecting": "Reconnecting…",
+    "clockDrift": "This tablet's clock is {{minutes}} min out. Countdowns use ours."
+  },
   "signin": {
     "title": "Sign in",
     "subtitle": "Enter the phone number NINETY registered for this yard.",
     "phone": "Phone number",
     "sendCode": "Send code",
-    "code": "6-digit code",
+    "code": "{{digits}}-digit code",
     "verify": "Sign in",
     "sent": "Code sent to {{phone}}",
     "resend": "Send a new code",
-    "language": "العربية"
+    "language": "العربية",
+    "connecting": "Connecting…"
   },
   "requests": {
     "title": "Live requests",
@@ -34,13 +41,13 @@
     "refurbished": "Refurb",
     "warranty": "Warranty",
     "none": "None",
-    "days30": "30 days",
-    "days90": "90 days",
-    "days180": "180 days",
+    "days30": "{{days}} days",
+    "days90": "{{days}} days",
+    "days180": "{{days}} days",
     "readyIn": "Ready in",
     "now": "Now",
-    "min15": "15 min",
-    "hour1": "1 hour",
+    "min15": "{{minutes}} min",
+    "hour1": "{{hours}} hour",
     "today": "Today",
     "note": "Note (optional)",
     "notePlaceholder": "Condition, fitment, anything the buyer should know",
@@ -89,10 +96,16 @@
     "medianResponse": "Median response",
     "jobsWon": "Jobs won",
     "earned": "Earned",
-    "incentive": "Yards scoring above 4.5 receive requests first. Reply faster to move up.",
-    "last30": "last 30 days"
+    "incentive": "Yards scoring above {{score}} receive requests first. Reply faster to move up.",
+    "last30": "last {{days}} days"
   },
-  "nav": { "requests": "Requests", "orders": "Orders", "stock": "Stock", "performance": "Me", "signOut": "Sign out" },
+  "nav": {
+    "requests": "Requests",
+    "orders": "Orders",
+    "stock": "Stock",
+    "performance": "Me",
+    "signOut": "Sign out"
+  },
   "errors": {
     "generic": "Something went wrong. Try again.",
     "network": "No connection. Your work is saved.",
@@ -100,6 +113,7 @@
     "alreadyQuoted": "You have already quoted on this job.",
     "priceRequired": "Enter a price.",
     "photoRequired": "Take at least one photo of the part.",
-    "contactDetails": "Your note was not sent"
+    "contactDetails": "Your note was not sent",
+    "contactDetailsWhy": "NINETY keeps both sides anonymous. That is what stops your next job being taken off the platform — and it is why we pay you automatically and handle the delivery. Remove the contact details and send it again."
   }
 }

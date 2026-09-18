@@ -25,6 +25,34 @@ export async function registerHealthRoutes(app: FastifyInstance): Promise<void> 
   });
 
   /**
+   * The live markets, before anybody has signed in.
+   *
+   * A terminal or an app has to know which market it is in, and in what
+   * language to render its sign-in screen, before it has a session to read that
+   * from. Baking "AE" and "ar-AE" into the client build is the obvious shortcut
+   * and it is exactly the hardcoded market value the guard forbids: it is how
+   * the second market ends up needing a second build of the same app.
+   *
+   * Nothing here is confidential — it is what a market is, not who is in it.
+   */
+  app.get('/v1/markets', async (_req, reply) => {
+    const { marketConfig } = await import('../market/config.js');
+    const markets = (await marketConfig.all()).filter((m) => m.isLive);
+    return reply.send({
+      markets: markets.map((m) => ({
+        code: m.code,
+        name: m.name,
+        localeDefault: m.localeDefault,
+        locales: m.locales,
+        rtl: m.rtl,
+        currency: m.currency,
+        currencyMinorUnitExponent: m.currencyMinorUnitExponent,
+        timezone: m.timezone,
+      })),
+    });
+  });
+
+  /**
    * The minimum supported buyer-app version.
    *
    * The app blocks below this and prompts to update. Built now rather than

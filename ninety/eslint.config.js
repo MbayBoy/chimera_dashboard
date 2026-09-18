@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 /**
  * Lint configuration.
@@ -43,6 +44,14 @@ export default tseslint.config(
   {
     // Front-end packages run in the browser.
     files: ['apps/terminal/**/*.{ts,tsx}', 'apps/admin/**/*.{ts,tsx}'],
+    // The hooks rules are here because both apps poll on an interval inside an
+    // effect, and a stale closure there shows a countdown that never moves —
+    // a bug that looks like a server problem and is not.
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
     languageOptions: {
       globals: {
         window: 'readonly',

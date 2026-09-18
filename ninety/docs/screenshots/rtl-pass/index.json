@@ -1,0 +1,405 @@
+[
+  {
+    "screen": "signin",
+    "label": "sign in",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "signin-ar-tablet.png"
+  },
+  {
+    "screen": "signin",
+    "label": "sign in",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "signin-ar-phone.png"
+  },
+  {
+    "screen": "signin",
+    "label": "sign in",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "signin-en-tablet.png"
+  },
+  {
+    "screen": "signin",
+    "label": "sign in",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "signin-en-phone.png"
+  },
+  {
+    "screen": "requests",
+    "label": "live jobs",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-warn"
+    ],
+    "file": "requests-ar-tablet.png"
+  },
+  {
+    "screen": "requests",
+    "label": "live jobs",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-warn",
+      "banner-warn"
+    ],
+    "file": "requests-ar-phone.png"
+  },
+  {
+    "screen": "requests",
+    "label": "live jobs",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-warn",
+      "banner-warn"
+    ],
+    "file": "requests-en-tablet.png"
+  },
+  {
+    "screen": "requests",
+    "label": "live jobs",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-warn",
+      "banner-warn"
+    ],
+    "file": "requests-en-phone.png"
+  },
+  {
+    "screen": "requests-empty",
+    "label": "no live jobs",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "requests-empty-ar-tablet.png"
+  },
+  {
+    "screen": "requests-empty",
+    "label": "no live jobs",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "requests-empty-ar-phone.png"
+  },
+  {
+    "screen": "requests-empty",
+    "label": "no live jobs",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "requests-empty-en-tablet.png"
+  },
+  {
+    "screen": "requests-empty",
+    "label": "no live jobs",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "requests-empty-en-phone.png"
+  },
+  {
+    "screen": "quote",
+    "label": "quote, price entered",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "quote-ar-tablet.png"
+  },
+  {
+    "screen": "quote",
+    "label": "quote, price entered",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "quote-ar-phone.png"
+  },
+  {
+    "screen": "quote",
+    "label": "quote, price entered",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "quote-en-tablet.png"
+  },
+  {
+    "screen": "quote",
+    "label": "quote, price entered",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "quote-en-phone.png"
+  },
+  {
+    "screen": "quote-error",
+    "label": "quote rejected for contact details",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-error"
+    ],
+    "file": "quote-error-ar-tablet.png"
+  },
+  {
+    "screen": "quote-error",
+    "label": "quote rejected for contact details",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-error"
+    ],
+    "file": "quote-error-ar-phone.png"
+  },
+  {
+    "screen": "quote-error",
+    "label": "quote rejected for contact details",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-error"
+    ],
+    "file": "quote-error-en-tablet.png"
+  },
+  {
+    "screen": "quote-error",
+    "label": "quote rejected for contact details",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-error"
+    ],
+    "file": "quote-error-en-phone.png"
+  },
+  {
+    "screen": "orders",
+    "label": "won jobs",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "orders-ar-tablet.png"
+  },
+  {
+    "screen": "orders",
+    "label": "won jobs",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "orders-ar-phone.png"
+  },
+  {
+    "screen": "orders",
+    "label": "won jobs",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "orders-en-tablet.png"
+  },
+  {
+    "screen": "orders",
+    "label": "won jobs",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "orders-en-phone.png"
+  },
+  {
+    "screen": "stock",
+    "label": "stock profile",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "stock-ar-tablet.png"
+  },
+  {
+    "screen": "stock",
+    "label": "stock profile",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [],
+    "file": "stock-ar-phone.png"
+  },
+  {
+    "screen": "stock",
+    "label": "stock profile",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "stock-en-tablet.png"
+  },
+  {
+    "screen": "stock",
+    "label": "stock profile",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [],
+    "file": "stock-en-phone.png"
+  },
+  {
+    "screen": "performance",
+    "label": "performance and score",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-info"
+    ],
+    "file": "performance-ar-tablet.png"
+  },
+  {
+    "screen": "performance",
+    "label": "performance and score",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-info"
+    ],
+    "file": "performance-ar-phone.png"
+  },
+  {
+    "screen": "performance",
+    "label": "performance and score",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-info"
+    ],
+    "file": "performance-en-tablet.png"
+  },
+  {
+    "screen": "performance",
+    "label": "performance and score",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-info"
+    ],
+    "file": "performance-en-phone.png"
+  },
+  {
+    "screen": "offline",
+    "label": "offline, with a queued offer",
+    "language": "ar",
+    "viewport": "tablet",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-info",
+      "banner-warn",
+      "banner-warn"
+    ],
+    "file": "offline-ar-tablet.png"
+  },
+  {
+    "screen": "offline",
+    "label": "offline, with a queued offer",
+    "language": "ar",
+    "viewport": "phone",
+    "dir": "rtl",
+    "overflow": [],
+    "banners": [
+      "banner-info",
+      "banner-warn",
+      "banner-warn"
+    ],
+    "file": "offline-ar-phone.png"
+  },
+  {
+    "screen": "offline",
+    "label": "offline, with a queued offer",
+    "language": "en",
+    "viewport": "tablet",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-info",
+      "banner-warn",
+      "banner-warn"
+    ],
+    "file": "offline-en-tablet.png"
+  },
+  {
+    "screen": "offline",
+    "label": "offline, with a queued offer",
+    "language": "en",
+    "viewport": "phone",
+    "dir": "ltr",
+    "overflow": [],
+    "banners": [
+      "banner-info",
+      "banner-warn",
+      "banner-warn"
+    ],
+    "file": "offline-en-phone.png"
+  }
+]

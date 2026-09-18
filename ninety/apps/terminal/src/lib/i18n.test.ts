@@ -58,4 +58,27 @@ describe('terminal localisation', () => {
     expect(english).toContain('420');
     expect(formatNumber('ar', 0.88, { style: 'percent' })).toMatch(/88/);
   });
+
+  it('no catalogue string hardcodes a digit in either script', () => {
+    // The regression this exists for: the Arabic catalogue spelled "٣٠ يومًا"
+    // by hand while every Intl-formatted number on the same screen rendered in
+    // Latin digits, because that is what ar-AE does. One screen, two numbering
+    // systems. Numbers belong in placeholders so Intl decides, once.
+    const offenders: string[] = [];
+    for (const language of ['en', 'ar'] as const) {
+      for (const key of catalogueKeys(language)) {
+        const value = translate(language, key);
+        if (/[0-9\u0660-\u0669\u06F0-\u06F9]/.test(value)) offenders.push(`${language}:${key} = ${value}`);
+      }
+    }
+    expect(offenders, 'a digit written into a translation instead of passed as a number').toEqual([]);
+  });
+
+  it('formats an interpolated number in the locale of the sentence around it', () => {
+    const arabic = translate('ar', 'quote.days30', { days: 30 });
+    const english = translate('en', 'quote.days30', { days: 30 });
+    expect(arabic).toContain(new Intl.NumberFormat('ar-AE').format(30));
+    expect(english).toContain(new Intl.NumberFormat('en-AE').format(30));
+    expect(arabic).not.toBe(english);
+  });
 });

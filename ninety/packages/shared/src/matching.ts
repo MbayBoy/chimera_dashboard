@@ -105,6 +105,16 @@ export const SUPPLIER_SCORE_BASE = 3.0;
 export const SUPPLIER_SCORE_MAX = 5.0;
 export const SUPPLIER_SCORE_MIN = 0.0;
 
+/**
+ * The score a yard is told to aim at.
+ *
+ * It appears in supplier-facing copy, so it lives here rather than as a number
+ * typed into a sentence: the same threshold has to be quoted by the terminal,
+ * by onboarding material and by anything else that explains the incentive, and
+ * three copies of it will not stay equal.
+ */
+export const SUPPLIER_SCORE_PRIORITY_THRESHOLD = 4.5;
+
 export function computeSupplierScore(c: SupplierScoreComponents): number {
   const raw =
     SUPPLIER_SCORE_BASE +

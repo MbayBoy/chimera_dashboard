@@ -5,13 +5,14 @@ import { QuoteScreen } from './components/QuoteScreen.js';
 import { Orders } from './components/Orders.js';
 import { StockProfile } from './components/StockProfile.js';
 import { Performance } from './components/Performance.js';
-import { isRtl, translate, type Language } from './lib/i18n.js';
+import { isRtl, localeFor, setMarketLocales, translate, type Language } from './lib/i18n.js';
 import { alertNewRequest, unlockAudio } from './lib/alert.js';
 import { clockIsSuspect, clockOffsetMs } from './lib/clock.js';
 import { dismissRejected, enqueue, flush, all as queuedItems, type QueuedItem } from './lib/queue.js';
 import {
   clearSession,
   fetchLiveRequests,
+  fetchMarkets,
   fetchOrders,
   fetchPerformance,
   loadSession,
@@ -19,6 +20,7 @@ import {
   saveSession,
   sendQueued,
   type LiveRequest,
+  type MarketSummary,
   type Performance as PerformanceData,
   type Session,
   type WonOrder,
@@ -60,12 +62,36 @@ export function App(): JSX.Element {
   );
 
   const seenRequestIds = useRef<Set<string>>(new Set());
+  const [market, setMarket] = useState<MarketSummary | null>(null);
   /*
    * The locale sent with every call follows the DEVICE's language switch, not
    * the account's stored preference. A terminal is shared hardware, and the
    * person at the counter chooses what they can read.
+   *
+   * Which locale that language means — ar-AE, ar-SA, en-ZA — belongs to the
+   * market and is learned from the server, never assembled here.
    */
-  const locale = language === 'ar' ? 'ar-AE' : 'en-AE';
+  const locale = localeFor(language);
+
+  // Ask once, before anything is rendered that formats a number.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const markets = await fetchMarkets();
+        if (cancelled || markets.length === 0) return;
+        const mine = markets.find((m) => m.code === session?.marketCode) ?? markets[0]!;
+        setMarketLocales(mine.locales);
+        setMarket(mine);
+      } catch {
+        // Offline at start-up: the bare language tag still formats sensibly,
+        // and this is retried on the next load.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.marketCode]);
 
   // RTL is layout. The whole document direction changes, not just the strings.
   useEffect(() => {
@@ -205,6 +231,7 @@ export function App(): JSX.Element {
       <div className="app" onPointerDown={() => void unlockAudio()}>
         <SignIn
           language={language}
+          market={market}
           onLanguage={setLanguage}
           onSignedIn={(next) => {
             saveSession(next);

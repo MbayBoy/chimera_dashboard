@@ -251,3 +251,12 @@ textarea {
   .jobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
   .content { padding: 24px; }
 }
+
+/* The explanation under a contact-details rejection. Smaller than the refusal
+   itself, but present: the rule only holds if the yard understands it. */
+.banner-why {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.85;
+}

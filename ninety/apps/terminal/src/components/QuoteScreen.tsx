@@ -156,11 +156,19 @@ export function QuoteScreen({
           <div className="banner banner-error">
             {error}
             {scrubIssues.length > 0 && (
-              <ul>
-                {scrubIssues.map((fragment) => (
-                  <li key={fragment}>{fragment}</li>
-                ))}
-              </ul>
+              <>
+                <ul>
+                  {scrubIssues.map((fragment) => (
+                    <li key={fragment}>{fragment}</li>
+                  ))}
+                </ul>
+                {/*
+                  The reason, not just the refusal. A yard told only "rejected"
+                  concludes the product is broken; a yard told why the rule
+                  exists — and that the rule is what pays them — does not.
+                */}
+                <p className="banner-why">{t('errors.contactDetailsWhy')}</p>
+              </>
             )}
           </div>
         )}
@@ -227,9 +235,9 @@ export function QuoteScreen({
           onSelect={(warrantyDays) => patch({ warrantyDays })}
           options={[
             { value: 0, label: t('quote.none') },
-            { value: 30, label: t('quote.days30') },
-            { value: 90, label: t('quote.days90') },
-            { value: 180, label: t('quote.days180') },
+            { value: 30, label: t('quote.days30', { days: 30 }) },
+            { value: 90, label: t('quote.days90', { days: 90 }) },
+            { value: 180, label: t('quote.days180', { days: 180 }) },
           ]}
         />
 
@@ -239,8 +247,8 @@ export function QuoteScreen({
           onSelect={(readyInMin) => patch({ readyInMin })}
           options={[
             { value: 0, label: t('quote.now') },
-            { value: 15, label: t('quote.min15') },
-            { value: 60, label: t('quote.hour1') },
+            { value: 15, label: t('quote.min15', { minutes: 15 }) },
+            { value: 60, label: t('quote.hour1', { hours: 1 }) },
             { value: 480, label: t('quote.today') },
           ]}
         />

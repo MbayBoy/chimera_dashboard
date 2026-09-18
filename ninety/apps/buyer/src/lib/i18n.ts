@@ -55,8 +55,29 @@ export function catalogueKeys(language: Language): string[] {
   return out.sort();
 }
 
+/**
+ * The market's own locales, learned from the server.
+ *
+ * Composing "ar" + "-AE" in the app is the shortcut that makes the same binary
+ * wrong in the second market: it decides on the device what numbers, dates and
+ * currency look like in a country the device has not been told about. The
+ * server knows, and says so before sign-in.
+ *
+ * Until it answers, the bare language tag is used — Intl resolves it sensibly,
+ * and it is honest about not yet knowing the region.
+ */
+const marketLocales = new Map<Language, string>();
+
+export function setMarketLocales(locales: readonly string[]): void {
+  marketLocales.clear();
+  for (const locale of locales) {
+    const language = locale.slice(0, 2);
+    if (language === 'ar' || language === 'en') marketLocales.set(language, locale);
+  }
+}
+
 export function localeFor(language: Language): string {
-  return language === 'ar' ? 'ar-AE' : 'en-AE';
+  return marketLocales.get(language) ?? language;
 }
 
 export function formatMoney(language: Language, minorUnits: number, currency: string, exponent = 2): string {

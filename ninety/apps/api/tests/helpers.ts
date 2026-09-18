@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { execSync } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 
 /**
  * Test harness.
@@ -12,13 +13,25 @@ import { execSync } from 'node:child_process';
 
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL ?? 'postgresql://ninety@localhost:5432/ninety_test';
 
+/** One per test file: vitest gives each file its own module registry. */
+const TEST_NAMESPACE = `ninety-test-${randomBytes(4).toString('hex')}`;
+
 export function useTestEnvironment(): void {
   process.env.NODE_ENV = 'test';
   process.env.DATABASE_URL = TEST_DATABASE_URL;
   process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
-  // A namespace of its own, so a test run never reads a development server's
-  // cached market configuration — whose UUIDs belong to a different database.
-  process.env.REDIS_NAMESPACE = 'ninety-test';
+  /*
+   * A namespace of its own, per test FILE.
+   *
+   * Two reasons. A shared namespace lets a test run read a development
+   * server's cached market configuration, whose UUIDs belong to a different
+   * database. And the queues live in it: with one namespace for the whole
+   * suite, a matching worker belonging to an earlier file can pick up a later
+   * file's job and run it against a connection pool that predates that file's
+   * schema reset — which fails with "no spatial operator found for
+   * 'st_dwithin'", once, in a long run, and looks like a broken PostGIS.
+   */
+  process.env.REDIS_NAMESPACE = TEST_NAMESPACE;
   process.env.JWT_SECRET = 'test-access-secret-not-used-anywhere-else';
   process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-not-used-anywhere-else';
   process.env.OTP_ECHO_IN_RESPONSE = 'true';
@@ -162,6 +175,22 @@ export async function clearRateLimits(): Promise<void> {
   const { getRedis } = await import('../src/core/redis.js');
   const redis = getRedis();
   const keys = await redis.keys(`${process.env.REDIS_NAMESPACE ?? 'ninety'}:rl:*`);
+  if (keys.length > 0) await redis.del(...keys);
+}
+
+/**
+ * Clear the hourly ping budgets.
+ *
+ * A supplier is capped at a fixed number of fan-outs an hour so the product
+ * cannot spam a yard into ignoring it. That is correct in production and wrong
+ * across a test suite: several files each posting a dozen requests against the
+ * same eight seeded yards exhausts the budget, and the file that runs last sees
+ * no fan-out at all — a passing test on its own, a failing one in the suite.
+ */
+export async function clearPingBudgets(): Promise<void> {
+  const { getRedis } = await import('../src/core/redis.js');
+  const redis = getRedis();
+  const keys = await redis.keys(`${process.env.REDIS_NAMESPACE ?? 'ninety'}:ping:*`);
   if (keys.length > 0) await redis.del(...keys);
 }
 

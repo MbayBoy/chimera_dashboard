@@ -1,6 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
-import { authenticate, bearer, buildTestServer, clearRateLimits, freshClientAddress, SEED_PHONES, type TestSession } from './helpers.js';
+import {
+  authenticate,
+  bearer,
+  buildTestServer,
+  clearPingBudgets,
+  clearRateLimits,
+  freshClientAddress,
+  SEED_PHONES,
+  type TestSession,
+} from './helpers.js';
 
 /**
  * The loop, end to end.
@@ -20,6 +29,7 @@ describe('the whole loop', () => {
   beforeAll(async () => {
     app = await buildTestServer();
     await clearRateLimits();
+    await clearPingBudgets();
     buyer = await authenticate(app, { phone: SEED_PHONES.buyer(1), role: 'buyer', locale: 'en-AE' });
     admin = await authenticate(app, { phone: SEED_PHONES.admin, role: 'admin', locale: 'en-AE' });
     for (let i = 1; i <= 6; i++) {

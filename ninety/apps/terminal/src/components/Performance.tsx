@@ -1,3 +1,4 @@
+import { SUPPLIER_SCORE_PRIORITY_THRESHOLD } from '@ninety/shared';
 import { translate, formatMoney, formatNumber, type Language } from '../lib/i18n.js';
 import type { Performance as PerformanceData } from '../lib/api.js';
 
@@ -42,7 +43,7 @@ export function Performance({
           <div className="stat-value">
             {data.responseRate30d === null ? '—' : formatNumber(language, data.responseRate30d, { style: 'percent' })}
           </div>
-          <div className="job-meta">{t('performance.last30')}</div>
+          <div className="job-meta">{t('performance.last30', { days: 30 })}</div>
         </div>
         <div className="stat">
           <div className="stat-label">{t('performance.medianResponse')}</div>
@@ -62,7 +63,7 @@ export function Performance({
 
       {/* Said out loud, on the screen that shows the number. A score nobody
           connects to money changes nobody's behaviour. */}
-      <div className="banner banner-info">{t('performance.incentive')}</div>
+      <div className="banner banner-info">{t('performance.incentive', { score: SUPPLIER_SCORE_PRIORITY_THRESHOLD })}</div>
     </div>
   );
 }

@@ -94,6 +94,24 @@ export async function resetDatabase(log: (s: string) => void = console.log): Pro
   log('  ⟲ dropping public schema');
   await sql.unsafe('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
   await migrateUp(log);
+
+  /*
+   * Throw the connections away.
+   *
+   * Dropping the schema takes PostGIS with it, and recreating it gives the
+   * geography type a new OID. A backend that was connected before the drop
+   * keeps its operator-class cache from the schema that no longer exists, and
+   * the next radius query on that connection fails with
+   *
+   *   no spatial operator found for 'st_dwithin': opfamily ... type ...
+   *
+   * which reads like a broken PostGIS installation and is not. It only bites
+   * the connections that survived the reset, so it surfaces as one flaky
+   * fan-out somewhere in a long test run — three hours of looking for a race
+   * that was never there.
+   */
+  await closeDb();
+  log('  ⟲ reconnected');
 }
 
 const isEntrypoint = process.argv[1] !== undefined && process.argv[1].endsWith('migrate.ts');

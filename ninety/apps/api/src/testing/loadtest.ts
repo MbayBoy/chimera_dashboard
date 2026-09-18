@@ -43,7 +43,10 @@ function parseOptions(argv: readonly string[]): Options {
     apiBase: value('api', process.env.LOADTEST_API ?? 'http://localhost:3000'),
     requests: Number(value('requests', '500')),
     terminals: Number(value('terminals', '200')),
-    marketCode: value('market', 'AE'),
+    // No default. A market code written into a tool is a market code that ends
+    // up in a run against the wrong market, and this one creates five hundred
+    // requests when it is wrong.
+    marketCode: value('market', process.env.LOADTEST_MARKET ?? ''),
   };
 }
 
@@ -196,6 +199,9 @@ async function openTerminals(options: Options): Promise<Terminal[]> {
 
 async function main(): Promise<void> {
   const options = parseOptions(process.argv.slice(2));
+  if (options.marketCode === '') {
+    throw new Error('pass --market <code> (or set LOADTEST_MARKET); the market is never assumed');
+  }
   console.log(`\nNINETY load test — ${options.requests} concurrent requests, ${options.terminals} terminals\n`);
 
   await seedLoadTerminals(options.terminals, options.marketCode, (s) => { console.log(`  ${s}`); });

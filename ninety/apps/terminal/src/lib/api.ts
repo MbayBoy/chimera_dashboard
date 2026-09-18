@@ -26,6 +26,28 @@ export interface Session {
   readonly displayName: string | null;
 }
 
+export interface MarketSummary {
+  readonly code: string;
+  readonly name: string;
+  readonly localeDefault: string;
+  readonly locales: readonly string[];
+  readonly rtl: boolean;
+  readonly currency: string;
+  readonly currencyMinorUnitExponent: number;
+  readonly timezone: string;
+}
+
+/**
+ * The live markets, before there is a session to read one from.
+ *
+ * Unauthenticated on purpose: the sign-in screen needs to know what market this
+ * terminal is in and what locale to render in, and it has no token yet.
+ */
+export async function fetchMarkets(): Promise<MarketSummary[]> {
+  const body = await apiFetch<{ markets: MarketSummary[] }>('/v1/markets', { method: 'GET' });
+  return body.markets;
+}
+
 export interface MeResponse {
   readonly id: string;
   readonly role: string;

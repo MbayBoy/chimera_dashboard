@@ -4,6 +4,7 @@ import {
   authenticate,
   bearer,
   buildTestServer,
+  clearPingBudgets,
   clearRateLimits,
   freshClientAddress,
   SEED_PHONES,
@@ -26,6 +27,7 @@ describe('disputes', () => {
   beforeAll(async () => {
     app = await buildTestServer();
     await clearRateLimits();
+    await clearPingBudgets();
     buyer = await authenticate(app, { phone: SEED_PHONES.buyer(3), role: 'buyer', locale: 'en-AE' });
     admin = await authenticate(app, { phone: SEED_PHONES.admin, role: 'admin', locale: 'en-AE' });
     for (let i = 1; i <= 6; i++) {
