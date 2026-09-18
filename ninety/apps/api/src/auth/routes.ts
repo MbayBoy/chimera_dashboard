@@ -168,10 +168,19 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
       id: actor.userId,
       role: actor.role,
       locale: actor.locale,
+      // A yard is told its own commercial terms. The commission rate is their
+      // contract with us, and the terminal shows a payout rather than asking
+      // them to work a percentage out in their head.
+      ...(actor.role === 'supplier'
+        ? { terms: { commissionRate: market.fees.commissionRate } }
+        : actor.role === 'buyer'
+          ? { terms: { buyerFeeRate: market.fees.buyerFeeRate, taxRate: market.tax.rate, taxLabel: market.tax.label } }
+          : {}),
       market: {
         code: market.code,
         name: market.name,
         currency: market.currency,
+        currencyMinorUnitExponent: market.currencyMinorUnitExponent,
         rtl: market.rtl,
         locales: market.locales,
         timezone: market.timezone,

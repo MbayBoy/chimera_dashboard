@@ -6,7 +6,7 @@ import { getDb } from '../db/client.js';
 import { buyers, suppliers, users } from '../db/schema.js';
 import { AppError } from '../core/errors.js';
 import { marketConfig } from '../market/config.js';
-import { resolveLocale } from '../i18n/index.js';
+import { languageOf, resolveLocale, supportedLanguages } from '../i18n/index.js';
 
 /**
  * Authentication and role guards.
@@ -47,7 +47,33 @@ export async function authenticate(req: FastifyRequest, _reply: FastifyReply): P
     locale: resolveLocale(user.locale, market.localeDefault),
   };
   req.ctx.market = market;
-  req.ctx.locale = req.ctx.actor.locale;
+
+  /*
+   * An explicit Accept-Language wins, for this request only.
+   *
+   * A terminal is shared hardware: the account belongs to the yard, but the
+   * person at the counter this afternoon may read English and the one this
+   * evening Arabic. The device's language switch has to change what the screen
+   * says, and the account's stored locale is still what a push notification
+   * uses — that is sent with no request in hand, and belongs to the yard rather
+   * than to whoever is standing there.
+   */
+  req.ctx.locale = preferredLocale(req, req.ctx.actor.locale);
+}
+
+/**
+ * Honour an explicit, supported Accept-Language over the stored locale.
+ *
+ * Only an explicit one: a browser sending `en-US,en;q=0.9` by default should not
+ * override an Arabic yard's account. The terminal sends the header deliberately
+ * when its language toggle is set.
+ */
+function preferredLocale(req: FastifyRequest, fallback: string): string {
+  const header = req.headers['accept-language'];
+  if (typeof header !== 'string' || header.trim() === '') return fallback;
+  const first = header.split(',')[0]?.trim() ?? '';
+  if (first === '' || first === '*') return fallback;
+  return supportedLanguages().includes(languageOf(first)) ? first : fallback;
 }
 
 /** Optional authentication: attaches an actor when a valid token is present. */

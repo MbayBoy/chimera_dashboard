@@ -66,7 +66,26 @@ const MIN_DIGITS_WITH_PREFIX = 7;
 const MIN_DIGITS_BARE = 8;
 const MAX_PHONE_DIGITS = 15;
 
+/**
+ * Shapes that look like phone numbers and are not.
+ *
+ * Dates are the common one: a yard writing "received 12-03-2024" or a system
+ * stamping an ISO date into a description must not be told their note contains a
+ * phone number. A false positive here is not harmless — the note is rejected
+ * outright, so the supplier loses the ninety seconds and learns to distrust the
+ * field.
+ */
+const DATE_SHAPES: readonly RegExp[] = [
+  /^\s*\d{4}[-/.]\d{1,2}[-/.]\d{1,2}\s*$/, // 2026-09-18
+  /^\s*\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}\s*$/, // 18-09-2026, 18/9/26
+];
+
+function isDateShaped(candidate: string): boolean {
+  return DATE_SHAPES.some((shape) => shape.test(candidate));
+}
+
 function isPhoneLike(candidate: string): boolean {
+  if (isDateShaped(candidate)) return false;
   const digits = candidate.replace(/\D/g, '');
   if (digits.length > MAX_PHONE_DIGITS) return false;
   const hasInternationalPrefix = /^\s*(?:\+|00)/.test(candidate);

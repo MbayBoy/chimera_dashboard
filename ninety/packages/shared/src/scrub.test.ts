@@ -58,6 +58,9 @@ describe('contact-detail detection', () => {
     ['an Arabic trade note', 'حالة ممتازة، خدش بسيط على العدسة'],
     ['a part number with letters', 'OEM 26550-1LB0A, genuine'],
     ['a warranty statement', '90 day warranty, no returns after fitting'],
+    ['an ISO date', 'stripped on 2026-09-18, shelf B'],
+    ['a written date', 'came in 18-09-2026'],
+    ['a slashed date', 'received 18/09/2026'],
   ] as const;
 
   for (const [label, text] of allowed) {
