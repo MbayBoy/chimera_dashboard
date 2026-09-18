@@ -24,7 +24,7 @@ function market(overrides: Partial<MarketConfig> = {}): MarketConfig {
     paymentProvider: 'stub',
     courierProviders: [],
     tax: { rate: 0.071, label: 'Tax', inclusive: false },
-    sla: { responseMin: 15, offersMin: 30, deliveryMin: 90 },
+    sla: { responseMin: 15, offersMin: 30, deliveryMin: 90, deliveryPeakMin: 180 },
     fees: { commissionRate: 0.093, buyerFeeRate: 0.037, deliveryMarkupRate: 0.25 },
     addressModel: 'hybrid',
     businessCalendar: { weekendDays: [6, 0], holidays: [] },

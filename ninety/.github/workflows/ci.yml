@@ -86,3 +86,16 @@ jobs:
         run: |
           ./scripts/guard-demo.sh
           ./scripts/locale-demo.sh
+
+      # The Play data-safety declaration has to match the manifest. Checked here
+      # rather than discovered by a store review three days before launch.
+      - name: Play data-safety declaration
+        run: node scripts/check-data-safety.mjs
+
+      # The unhappy-path document is generated from the shipping catalogues. If
+      # regenerating it changes anything, somebody edited the document instead of
+      # the copy, and the launch team would be quoting a message nobody receives.
+      - name: The unhappy-path document matches the product
+        run: |
+          node scripts/generate-unhappy-paths.mjs
+          git diff --exit-code docs/UNHAPPY-PATHS.md

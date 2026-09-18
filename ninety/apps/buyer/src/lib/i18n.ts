@@ -36,9 +36,13 @@ function lookup(catalogue: Record<string, unknown>, key: string): string | undef
 
 export function translate(language: Language, key: string, params: Record<string, string | number> = {}): string {
   const template = lookup(CATALOGUES[language] ?? {}, key) ?? lookup(CATALOGUES.en!, key) ?? key;
-  return template.replace(/\{\{(\w+)\}\}/g, (_m, name: string) =>
-    Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : `{{${name}}}`,
-  );
+  return template.replace(/\{\{(\w+)\}\}/g, (_m, name: string) => {
+    if (!Object.prototype.hasOwnProperty.call(params, name)) return `{{${name}}}`;
+    const value = params[name];
+    // Numbers are formatted in the locale of the sentence around them, so one
+    // screen never mixes two numbering systems.
+    return typeof value === 'number' ? new Intl.NumberFormat(localeFor(language)).format(value) : String(value);
+  });
 }
 
 export function catalogueKeys(language: Language): string[] {

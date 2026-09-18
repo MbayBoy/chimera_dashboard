@@ -39,14 +39,16 @@ export async function seed(log: (s: string) => void = console.log): Promise<void
         code, name, currency, currency_minor_unit_exp, locale_default, locales_supported, timezone,
         vehicle_id_type, vehicle_id_regex, payment_provider, courier_providers,
         tax_rate, tax_label, tax_inclusive, commission_rate, buyer_fee_rate, delivery_markup_rate,
-        sla_response_min, sla_offers_min, sla_delivery_min, selection_window_min, widening_window_min,
+        sla_response_min, sla_offers_min, sla_delivery_min, sla_delivery_peak_min,
+        selection_window_min, widening_window_min,
         auto_confirm_hours, financial_retention_years, address_model, weekend_days, is_live
       ) VALUES (
         ${m.code}, ${m.name}, ${m.currency}, ${m.currencyMinorUnitExp}, ${m.localeDefault},
         ${m.localesSupported}, ${m.timezone}, ${m.vehicleIdType}, ${m.vehicleIdRegex},
         ${m.paymentProvider}, ${m.courierProviders}, ${m.taxRate}, ${m.taxLabel}, ${m.taxInclusive},
         ${m.commissionRate}, ${m.buyerFeeRate}, ${m.deliveryMarkupRate},
-        ${m.slaResponseMin}, ${m.slaOffersMin}, ${m.slaDeliveryMin}, ${m.selectionWindowMin},
+        ${m.slaResponseMin}, ${m.slaOffersMin}, ${m.slaDeliveryMin}, ${m.slaDeliveryPeakMin},
+        ${m.selectionWindowMin},
         ${m.wideningWindowMin}, ${m.autoConfirmHours}, ${m.financialRetentionYears},
         ${m.addressModel}, ${m.weekendDays}, ${m.isLive}
       )

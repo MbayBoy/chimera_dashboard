@@ -32,6 +32,7 @@ export interface MarketSeed {
   slaResponseMin: number;
   slaOffersMin: number;
   slaDeliveryMin: number;
+  slaDeliveryPeakMin: number;
   selectionWindowMin: number;
   wideningWindowMin: number;
   autoConfirmHours: number;
@@ -70,6 +71,7 @@ export const MARKETS: MarketSeed[] = [
     slaResponseMin: 15,
     slaOffersMin: 30,
     slaDeliveryMin: 90,
+    slaDeliveryPeakMin: 180,
     selectionWindowMin: 120,
     wideningWindowMin: 45,
     autoConfirmHours: 24,
@@ -104,6 +106,7 @@ export const MARKETS: MarketSeed[] = [
     slaResponseMin: 15,
     slaOffersMin: 30,
     slaDeliveryMin: 90,
+    slaDeliveryPeakMin: 180,
     selectionWindowMin: 120,
     wideningWindowMin: 45,
     autoConfirmHours: 24,

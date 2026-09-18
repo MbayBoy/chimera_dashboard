@@ -24,6 +24,7 @@ export function TrackingScreen({
   orderId,
   language,
   timezone,
+  autoConfirmHours,
   onProblem,
   onConfirmed,
 }: {
@@ -32,6 +33,8 @@ export function TrackingScreen({
   orderId: string;
   language: Language;
   timezone: string;
+  /** The market's own auto-confirm window. Said out loud, in its own numbers. */
+  autoConfirmHours: number;
   onProblem: () => void;
   onConfirmed: () => void;
 }): JSX.Element {
@@ -105,7 +108,7 @@ export function TrackingScreen({
             <Text style={styles.buttonText}>{t('tracking.problem')}</Text>
           </Pressable>
           {/* Said out loud, because a silent auto-capture is how trust goes. */}
-          <Text style={styles.dim}>{t('tracking.autoConfirm')}</Text>
+          <Text style={styles.dim}>{t('tracking.autoConfirm', { hours: autoConfirmHours })}</Text>
         </>
       )}
     </ScrollView>

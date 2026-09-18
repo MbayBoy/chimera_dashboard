@@ -48,6 +48,8 @@ export const markets = pgTable('markets', {
   slaResponseMin: integer('sla_response_min').notNull(),
   slaOffersMin: integer('sla_offers_min').notNull(),
   slaDeliveryMin: integer('sla_delivery_min').notNull(),
+  /** The honest upper bound quoted in the public promise, in peak traffic. */
+  slaDeliveryPeakMin: integer('sla_delivery_peak_min').notNull(),
   selectionWindowMin: integer('selection_window_min').notNull(),
   wideningWindowMin: integer('widening_window_min').notNull(),
   autoConfirmHours: integer('auto_confirm_hours').notNull(),

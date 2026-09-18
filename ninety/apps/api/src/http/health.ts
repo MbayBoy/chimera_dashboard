@@ -48,6 +48,9 @@ export async function registerHealthRoutes(app: FastifyInstance): Promise<void> 
         currency: m.currency,
         currencyMinorUnitExponent: m.currencyMinorUnitExponent,
         timezone: m.timezone,
+        // The public promise is made of these, so an app can state it in the
+        // market's own numbers rather than in numbers typed into a sentence.
+        sla: m.sla,
       })),
     });
   });

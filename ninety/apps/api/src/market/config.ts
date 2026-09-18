@@ -65,7 +65,12 @@ function toConfig(row: MarketRow, rtl: boolean): MarketConfig {
     paymentProvider: row.paymentProvider,
     courierProviders: row.courierProviders,
     tax: { rate: Number(row.taxRate), label: row.taxLabel, inclusive: row.taxInclusive },
-    sla: { responseMin: row.slaResponseMin, offersMin: row.slaOffersMin, deliveryMin: row.slaDeliveryMin },
+    sla: {
+      responseMin: row.slaResponseMin,
+      offersMin: row.slaOffersMin,
+      deliveryMin: row.slaDeliveryMin,
+      deliveryPeakMin: row.slaDeliveryPeakMin,
+    },
     fees: {
       commissionRate: Number(row.commissionRate),
       buyerFeeRate: Number(row.buyerFeeRate),

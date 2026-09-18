@@ -452,13 +452,19 @@ export async function autoConfirmDelivery(requestId: string): Promise<void> {
     await getDb().select().from(orders).where(eq(orders.requestId, requestId)).orderBy(desc(orders.createdAt)).limit(1)
   )[0];
   if (!order) return;
-  await captureForOrder(order.id, 'auto-confirmed after 24 hours');
+  const windows = await marketConfig.windows(
+    (await getDb().select({ marketId: requests.marketId }).from(requests).where(eq(requests.id, requestId)).limit(1))[0]!
+      .marketId,
+  );
+  await captureForOrder(order.id, `auto-confirmed after ${windows.autoConfirmHours} hours`);
   await transitionIfStillIn(requestId, [RequestState.COMPLETED], 'CLOSE', { actorType: 'timer' });
 
   const request = (await getDb().select().from(requests).where(eq(requests.id, requestId)).limit(1))[0]!;
   const market = await marketConfig.byId(request.marketId);
   await notifyBuyer(order.buyerId, requestId, 'notify.buyer.auto_confirmed', {
     reference: request.reference,
+    // The window is the market's, not a number in a sentence.
+    hours: windows.autoConfirmHours,
     total: (order.totalCents / Math.pow(10, market.currencyMinorUnitExponent)).toFixed(market.currencyMinorUnitExponent),
   });
 }

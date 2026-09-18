@@ -18,7 +18,7 @@
     "token_invalid": "Your session has ended. Please sign in again.",
     "role_not_permitted": "This account cannot use that part of NINETY.",
     "request_not_yours": "That request belongs to another account.",
-    "offer_window_closed": "The 15 minutes for this job have passed. It is no longer open for quotes.",
+    "offer_window_closed": "The window for this job has passed. It is no longer open for quotes.",
     "request_window_closed": "This request has closed.",
     "already_offered": "You have already quoted on this job.",
     "offer_not_available": "That offer is no longer available. Please choose another.",
@@ -26,7 +26,7 @@
     "supplier_not_fanned_out": "This job was not sent to you.",
     "duplicate_request": "You posted a very similar request a few minutes ago. Post it again anyway, or open the one you already have.",
     "invalid_vehicle_identifier": "That vehicle number does not look right for this country. You can enter the make, model and year instead.",
-    "media_too_large": "That file is too large. Photos should be under 12 MB.",
+    "media_too_large": "That file is too large. Photos should be under {{megabytes}} MB.",
     "media_type_not_allowed": "Only photos and short videos can be uploaded.",
     "app_update_required": "Please update NINETY to continue.",
     "dispute_counterparty_cannot_resolve": "A dispute cannot be resolved by the other side of the order.",
@@ -81,7 +81,7 @@
       "delivery_failed": "We could not complete delivery of {{reference}}. The hold on your card has been released and nothing has been charged. Our team is on it.",
       "courier_all_failed": "No driver has accepted {{reference}} yet, so a member of our team is arranging one directly. New expected time {{eta}}. Nothing has been charged.",
       "courier_failed_after_collection": "Your part for {{reference}} has been collected but the delivery has run into a problem. It is safe, our team is tracking it, and we will call you within the hour.",
-      "auto_confirmed": "{{reference}} was completed automatically after 24 hours. Payment of {{total}} has been taken. If something was wrong, you can still raise it with us.",
+      "auto_confirmed": "{{reference}} was completed automatically after {{hours}} hours. Payment of {{total}} has been taken. If something was wrong, you can still raise it with us.",
       "offer_withdrawn": "One of the offers on {{reference}} was withdrawn by the yard. Your remaining offers are still open.",
       "accepted_offer_withdrawn": "The yard withdrew the offer you accepted on {{reference}}. Nothing has been charged and the hold is released — your other offers are open again.",
       "request_expired": "{{reference}} expired because no offer was chosen. Nothing was charged. You can post it again in one tap.",
@@ -111,7 +111,7 @@
     "terminal_offline_at_fanout": "Your terminal was offline when this job went out, so you did not miss it and it has not affected your score."
   },
   "sla": {
-    "public_promise": "Offers in 30 minutes. Delivered in 90, typically — up to 3 hours in peak traffic.",
+    "public_promise": "Offers in {{offersMinutes}} minutes. Delivered in {{deliveryMinutes}}, typically — up to {{peakHours}} hours in peak traffic.",
     "peak": "peak traffic",
     "offpeak": "off-peak"
   },

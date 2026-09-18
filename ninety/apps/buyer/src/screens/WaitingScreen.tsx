@@ -28,14 +28,20 @@ export function WaitingScreen({
   language,
   currency,
   currencyExponent,
+  responseMinutes,
   onChoose,
+  onPostAgain,
 }: {
   client: ClientOptions;
   requestId: string;
   language: Language;
   currency: string;
   currencyExponent: number;
+  /** The market's own response window, so the screen states it rather than assumes it. */
+  responseMinutes: number;
   onChoose: (offer: BuyerOffer) => void;
+  /** The only action worth offering when a request ends with nothing. */
+  onPostAgain: () => void;
 }): JSX.Element {
   const t = (key: string, params?: Record<string, string | number>) => translate(language, key, params);
   const [data, setData] = useState<OffersResponse | null>(null);
@@ -85,6 +91,37 @@ export function WaitingScreen({
 
   const widened = data.status === 'WIDENING';
 
+  /*
+   * The honest ending.
+   *
+   * A request that closes with nothing is the outcome most likely to lose a
+   * buyer for good, and the one a screen is most likely to have no state for:
+   * the push notification says it plainly and then the app they open sits on a
+   * countdown at zero. Said here, on the screen, with the one action that is
+   * worth anything — post it again.
+   */
+  const closedEmpty: Readonly<Record<string, string>> = {
+    NO_OFFERS: 'waiting.noOffers',
+    NO_SUPPLY: 'waiting.noSupply',
+    EXPIRED: 'waiting.expired',
+    CANCELLED: 'waiting.cancelled',
+  };
+  const endedKey = closedEmpty[data.status];
+
+  if (endedKey !== undefined) {
+    return (
+      <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+        <View style={[styles.banner, styles.bannerWarn]}>
+          <Text style={styles.h2}>{t(endedKey)}</Text>
+          <Text style={styles.dim}>{t('waiting.endedHint')}</Text>
+        </View>
+        <Pressable style={styles.button} onPress={onPostAgain}>
+          <Text style={styles.buttonText}>{t('waiting.postAgain')}</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={countdownStyle}>{`${minutes}:${String(seconds).padStart(2, '0')}`}</Text>
@@ -105,7 +142,7 @@ export function WaitingScreen({
         <View style={[styles.banner, styles.bannerInfo]}>
           {/* Said plainly, with what happens next. Silence is what loses a buyer. */}
           <Text style={styles.h2}>{t('waiting.noneYet')}</Text>
-          <Text style={styles.dim}>{t('waiting.noneYetHint')}</Text>
+          <Text style={styles.dim}>{t('waiting.noneYetHint', { minutes: responseMinutes })}</Text>
         </View>
       ) : (
         <>

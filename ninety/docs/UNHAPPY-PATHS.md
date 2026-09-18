@@ -183,9 +183,9 @@ The rule behind all of it: the handling is not the feature, the message is. A bu
 
 **`notify.buyer.auto_confirmed`**
 
-> {{reference}} was completed automatically after 24 hours. Payment of {{total}} has been taken. If something was wrong, you can still raise it with us.
+> {{reference}} was completed automatically after {{hours}} hours. Payment of {{total}} has been taken. If something was wrong, you can still raise it with us.
 
-> اكتمل {{reference}} تلقائيًا بعد أربع وعشرين ساعة. تم خصم مبلغ {{total}}. إن كان هناك خطأ، ما زال بإمكانك إبلاغنا.
+> اكتمل {{reference}} تلقائيًا بعد {{hours}} ساعة. تم خصم مبلغ {{total}}. إن كان هناك خطأ، ما زال بإمكانك إبلاغنا.
 
 ## 10. The same request is posted twice
 
@@ -271,7 +271,7 @@ The full catalogue, so nothing below is quoted out of context.
 | `error.token_invalid` | Your session has ended. Please sign in again. | انتهت جلستك. يرجى تسجيل الدخول من جديد. |
 | `error.role_not_permitted` | This account cannot use that part of NINETY. | هذا الحساب لا يمكنه استخدام هذا الجزء من ناينتي. |
 | `error.request_not_yours` | That request belongs to another account. | هذا الطلب يخص حسابًا آخر. |
-| `error.offer_window_closed` | The 15 minutes for this job have passed. It is no longer open for quotes. | انقضت الخمس عشرة دقيقة الخاصة بهذا الطلب. لم يعد مفتوحًا لعروض الأسعار. |
+| `error.offer_window_closed` | The window for this job has passed. It is no longer open for quotes. | انقضت مهلة هذا الطلب. لم يعد مفتوحًا لعروض الأسعار. |
 | `error.request_window_closed` | This request has closed. | أُغلق هذا الطلب. |
 | `error.already_offered` | You have already quoted on this job. | لقد قدّمت عرضًا على هذا الطلب من قبل. |
 | `error.offer_not_available` | That offer is no longer available. Please choose another. | هذا العرض لم يعد متاحًا. يرجى اختيار عرض آخر. |
@@ -279,7 +279,7 @@ The full catalogue, so nothing below is quoted out of context.
 | `error.supplier_not_fanned_out` | This job was not sent to you. | هذا الطلب لم يُرسل إليك. |
 | `error.duplicate_request` | You posted a very similar request a few minutes ago. Post it again anyway, or open the one you already have. | لقد نشرت طلبًا مشابهًا جدًا قبل دقائق. يمكنك نشره مرة أخرى على أي حال، أو فتح الطلب الموجود لديك. |
 | `error.invalid_vehicle_identifier` | That vehicle number does not look right for this country. You can enter the make, model and year instead. | رقم الهيكل لا يبدو صحيحًا لهذه الدولة. يمكنك إدخال الماركة والموديل وسنة الصنع بدلًا من ذلك. |
-| `error.media_too_large` | That file is too large. Photos should be under 12 MB. | حجم الملف كبير جدًا. يجب أن تكون الصور أقل من ١٢ ميجابايت. |
+| `error.media_too_large` | That file is too large. Photos should be under {{megabytes}} MB. | حجم الملف كبير جدًا. يجب أن تكون الصور أقل من {{megabytes}} ميجابايت. |
 | `error.media_type_not_allowed` | Only photos and short videos can be uploaded. | يمكن رفع الصور ومقاطع الفيديو القصيرة فقط. |
 | `error.app_update_required` | Please update NINETY to continue. | يرجى تحديث تطبيق ناينتي للمتابعة. |
 | `error.dispute_counterparty_cannot_resolve` | A dispute cannot be resolved by the other side of the order. | لا يمكن للطرف الآخر في الطلب أن يبتّ في الشكوى. |
@@ -327,7 +327,7 @@ The full catalogue, so nothing below is quoted out of context.
 | `notify.buyer.delivery_failed` | We could not complete delivery of {{reference}}. The hold on your card has been released and nothing has been charged. Our team is on it. | لم نتمكن من إتمام توصيل {{reference}}. أُلغي الحجز على بطاقتك ولم يُخصم أي مبلغ. فريقنا يتابع الأمر. |
 | `notify.buyer.courier_all_failed` | No driver has accepted {{reference}} yet, so a member of our team is arranging one directly. New expected time {{eta}}. Nothing has been charged. | لم يقبل أي سائق طلب {{reference}} حتى الآن، لذلك يتولى أحد أفراد فريقنا ترتيب السائق مباشرة. الوقت المتوقع الجديد {{eta}}. لم يُخصم أي مبلغ. |
 | `notify.buyer.courier_failed_after_collection` | Your part for {{reference}} has been collected but the delivery has run into a problem. It is safe, our team is tracking it, and we will call you within the hour. | تم استلام قطعتك الخاصة بـ {{reference}} لكن التوصيل واجه مشكلة. القطعة بأمان، وفريقنا يتابعها، وسنتصل بك خلال ساعة. |
-| `notify.buyer.auto_confirmed` | {{reference}} was completed automatically after 24 hours. Payment of {{total}} has been taken. If something was wrong, you can still raise it with us. | اكتمل {{reference}} تلقائيًا بعد أربع وعشرين ساعة. تم خصم مبلغ {{total}}. إن كان هناك خطأ، ما زال بإمكانك إبلاغنا. |
+| `notify.buyer.auto_confirmed` | {{reference}} was completed automatically after {{hours}} hours. Payment of {{total}} has been taken. If something was wrong, you can still raise it with us. | اكتمل {{reference}} تلقائيًا بعد {{hours}} ساعة. تم خصم مبلغ {{total}}. إن كان هناك خطأ، ما زال بإمكانك إبلاغنا. |
 | `notify.buyer.offer_withdrawn` | One of the offers on {{reference}} was withdrawn by the yard. Your remaining offers are still open. | سحب أحد المحلات عرضه على {{reference}}. بقية العروض ما زالت متاحة. |
 | `notify.buyer.accepted_offer_withdrawn` | The yard withdrew the offer you accepted on {{reference}}. Nothing has been charged and the hold is released — your other offers are open again. | سحب المحل العرض الذي قبلته على {{reference}}. لم يُخصم أي مبلغ وأُلغي الحجز — وعروضك الأخرى متاحة من جديد. |
 | `notify.buyer.request_expired` | {{reference}} expired because no offer was chosen. Nothing was charged. You can post it again in one tap. | انتهت صلاحية {{reference}} لأنه لم يُختر أي عرض. لم يُخصم أي مبلغ. يمكنك إعادة نشره بضغطة واحدة. |
@@ -350,7 +350,7 @@ The full catalogue, so nothing below is quoted out of context.
 | `unhappy.buyer_cancelled_authorised` | You cancelled {{reference}}. The hold on your card has been released — nothing was taken. | ألغيت {{reference}}. أُلغي الحجز على بطاقتك — ولم يُخصم أي مبلغ. |
 | `unhappy.buyer_cancelled_dispatched` | You cancelled {{reference}} after a driver had collected it. We have released the hold and our team will contact you about the return. | ألغيت {{reference}} بعد أن استلم السائق القطعة. أُلغي الحجز وسيتواصل معك فريقنا بشأن الإرجاع. |
 | `unhappy.terminal_offline_at_fanout` | Your terminal was offline when this job went out, so you did not miss it and it has not affected your score. | كان جهازك غير متصل عند إرسال هذا الطلب، لذلك لم تفوّته ولم يؤثر على تقييمك. |
-| `sla.public_promise` | Offers in 30 minutes. Delivered in 90, typically — up to 3 hours in peak traffic. | عروض خلال ٣٠ دقيقة. والتوصيل خلال ٩٠ دقيقة عادةً — وقد يصل إلى ٣ ساعات في أوقات الازدحام. |
+| `sla.public_promise` | Offers in {{offersMinutes}} minutes. Delivered in {{deliveryMinutes}}, typically — up to {{peakHours}} hours in peak traffic. | عروض خلال {{offersMinutes}} دقيقة. والتوصيل خلال {{deliveryMinutes}} دقيقة عادةً — وقد يصل إلى {{peakHours}} ساعات في أوقات الازدحام. |
 | `sla.peak` | peak traffic | ساعة الذروة |
 | `sla.offpeak` | off-peak | خارج ساعة الذروة |
 | `common.yes` | Yes | نعم |

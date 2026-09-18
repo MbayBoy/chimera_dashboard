@@ -38,10 +38,21 @@ describe('buyer app localisation', () => {
   it('states the delivery promise honestly, in both languages', () => {
     // "Typically 90 minutes, up to 3 hours in peak traffic" — never a guarantee.
     // A promise broken twice a week is worse than a slower promise kept.
-    expect(translate('en', 'app.promise')).toMatch(/up to 3 hours/i);
-    expect(translate('en', 'app.promise')).not.toMatch(/guarantee/i);
-    expect(translate('ar', 'app.promise')).toMatch(/[؀-ۿ]/);
-    expect(translate('ar', 'app.promise')).toMatch(/٣ ساعات/);
+    //
+    // The numbers come from the market, so the sentence is checked with the
+    // market's numbers in it rather than with numbers typed into the catalogue.
+    const params = { offersMinutes: 30, deliveryMinutes: 90, peakHours: 3 };
+    const english = translate('en', 'app.promise', params);
+    expect(english).toMatch(/up to 3 hours/i);
+    expect(english).toMatch(/typically/i);
+    expect(english).not.toMatch(/guarantee/i);
+
+    const arabic = translate('ar', 'app.promise', params);
+    expect(arabic).toMatch(/[؀-ۿ]/);
+    expect(arabic).toMatch(/3 ساعات/);
+    // And the sentence must still be a sentence: no placeholder left unfilled.
+    expect(arabic).not.toMatch(/\{\{/);
+    expect(english).not.toMatch(/\{\{/);
   });
 
   it('tells a buyer their card is authorised rather than charged', () => {

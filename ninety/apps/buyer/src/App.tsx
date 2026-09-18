@@ -14,6 +14,7 @@ import { colors, styles } from './lib/theme.js';
 import { isRtlLanguage, languageForLocale, localeFor, setMarketLocales, translate, type Language } from './lib/i18n.js';
 import { checkVersion } from './lib/version.js';
 import { request, type BuyerOffer, type BuyerSession, type ClientOptions } from './lib/api.js';
+import { OTP_CODE_LENGTH } from '@ninety/shared';
 
 /**
  * The buyer app.
@@ -169,7 +170,9 @@ export function App(): JSX.Element {
           language={language}
           currency={session.currency}
           currencyExponent={session.currencyExponent}
+          responseMinutes={session.sla.responseMin}
           onChoose={(offer) => setStage({ name: 'accept', requestId: stage.requestId, offer })}
+          onPostAgain={() => setStage({ name: 'new' })}
         />
       )}
 
@@ -195,6 +198,7 @@ export function App(): JSX.Element {
           orderId={stage.orderId}
           language={language}
           timezone={session.timezone}
+          autoConfirmHours={session.windows.autoConfirmHours}
           onProblem={() => undefined}
           onConfirmed={() => setStage({ name: 'new' })}
         />
@@ -218,6 +222,9 @@ function SignIn({
   const [stage, setStage] = useState<'phone' | 'code'>('phone');
   const [error, setError] = useState<string | null>(null);
   const [marketCode, setMarketCode] = useState<string | null>(PINNED_MARKET_CODE ?? null);
+  const [promiseSla, setPromiseSla] = useState<{ offersMin: number; deliveryMin: number; deliveryPeakMin: number } | null>(
+    null,
+  );
 
   const client: ClientOptions = { apiBase: API_BASE, locale: localeFor(language) };
 
@@ -227,10 +234,17 @@ function SignIn({
     let cancelled = false;
     void (async () => {
       try {
-        const body = await request<{ markets: { code: string; locales: string[] }[] }>(client, '/v1/markets');
+        const body = await request<{
+          markets: {
+            code: string;
+            locales: string[];
+            sla: { offersMin: number; deliveryMin: number; deliveryPeakMin: number };
+          }[];
+        }>(client, '/v1/markets');
         if (cancelled || body.markets.length === 0) return;
         setMarketLocales(body.markets[0]!.locales);
         setMarketCode(body.markets[0]!.code);
+        setPromiseSla(body.markets[0]!.sla);
       } catch {
         // Offline at start-up. Retried when the screen is next opened.
       }
@@ -274,7 +288,8 @@ function SignIn({
           timezone: string;
           vehicleIdentifier: { type: 'vin' | 'chassis' };
           addressModel: 'street' | 'makani' | 'hybrid';
-          sla: { responseMin: number; offersMin: number; deliveryMin: number };
+          sla: { responseMin: number; offersMin: number; deliveryMin: number; deliveryPeakMin: number };
+          windows: { selectionWindowMin: number; wideningWindowMin: number; autoConfirmHours: number };
         };
       }>({ ...client, token: result.accessToken }, '/v1/auth/me');
 
@@ -289,6 +304,7 @@ function SignIn({
         vehicleIdentifierType: me.market.vehicleIdentifier.type,
         addressModel: me.market.addressModel,
         sla: me.market.sla,
+        windows: me.market.windows,
       });
     } catch (err) {
       setError((err as Error).message);
@@ -301,7 +317,17 @@ function SignIn({
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.h1}>{t('app.name')}</Text>
         {/* The honest promise, said on the first screen. */}
-        <Text style={styles.dim}>{t('app.promise')}</Text>
+        {/* The honest promise, in the market's own numbers. Nothing is claimed
+            until the server has said what the numbers are. */}
+        {promiseSla !== null && (
+          <Text style={styles.dim}>
+            {t('app.promise', {
+              offersMinutes: promiseSla.offersMin,
+              deliveryMinutes: promiseSla.deliveryMin,
+              peakHours: Math.round(promiseSla.deliveryPeakMin / 60),
+            })}
+          </Text>
+        )}
 
         {error !== null && (
           <View style={[styles.banner, styles.bannerError]}>
@@ -319,7 +345,7 @@ function SignIn({
           </>
         ) : (
           <>
-            <Text style={styles.label}>{t('signin.code')}</Text>
+            <Text style={styles.label}>{t('signin.code', { digits: OTP_CODE_LENGTH })}</Text>
             <TextInputBox value={code} onChange={setCode} keyboard="number-pad" />
             <Pressable style={[styles.button, styles.buttonPrimary]} onPress={() => void verify()}>
               <Text style={styles.buttonPrimaryText}>{t('signin.verify')}</Text>

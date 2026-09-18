@@ -17,7 +17,8 @@ export interface BuyerSession {
   readonly timezone: string;
   readonly vehicleIdentifierType: 'vin' | 'chassis';
   readonly addressModel: 'street' | 'makani' | 'hybrid';
-  readonly sla: { responseMin: number; offersMin: number; deliveryMin: number };
+  readonly sla: { responseMin: number; offersMin: number; deliveryMin: number; deliveryPeakMin: number };
+  readonly windows: { selectionWindowMin: number; wideningWindowMin: number; autoConfirmHours: number };
 }
 
 export class ApiError extends Error {

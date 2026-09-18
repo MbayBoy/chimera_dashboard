@@ -5,6 +5,7 @@ import { otpCodes } from '../db/schema.js';
 import { AppError } from '../core/errors.js';
 import { log } from '../core/logger.js';
 import { env } from '../env.js';
+import { OTP_CODE_LENGTH } from '@ninety/shared';
 
 /**
  * Phone OTP.
@@ -15,7 +16,7 @@ import { env } from '../env.js';
  * with unlimited attempts is a four-digit code.
  */
 
-const CODE_LENGTH = 6;
+const CODE_LENGTH = OTP_CODE_LENGTH;
 const TTL_SECONDS = 300;
 const MAX_ATTEMPTS = 5;
 

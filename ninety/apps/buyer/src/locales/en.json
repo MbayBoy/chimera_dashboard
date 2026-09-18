@@ -1,6 +1,19 @@
 {
-  "app": { "name": "NINETY", "promise": "Offers in 30 minutes. Delivered in 90, typically — up to 3 hours in peak traffic." },
-  "signin": { "title": "Sign in", "phone": "Mobile number", "sendCode": "Send code", "code": "6-digit code", "verify": "Sign in", "business": "Workshop name", "language": "العربية", "updateRequired": "Please update NINETY to continue.", "updateNow": "Update" },
+  "app": {
+    "name": "NINETY",
+    "promise": "Offers in {{offersMinutes}} minutes. Delivered in {{deliveryMinutes}}, typically — up to {{peakHours}} hours in peak traffic."
+  },
+  "signin": {
+    "title": "Sign in",
+    "phone": "Mobile number",
+    "sendCode": "Send code",
+    "code": "{{digits}}-digit code",
+    "verify": "Sign in",
+    "business": "Workshop name",
+    "language": "العربية",
+    "updateRequired": "Please update NINETY to continue.",
+    "updateNow": "Update"
+  },
   "new": {
     "title": "What do you need?",
     "vehicle": "Vehicle",
@@ -29,7 +42,7 @@
     "sentTo": "Sent to {{count}} suppliers",
     "responded": "{{count}} have responded",
     "noneYet": "No offers yet.",
-    "noneYetHint": "Yards have 15 minutes to answer. We will tell you either way.",
+    "noneYetHint": "Yards have {{minutes}} minutes to answer. We will tell you either way.",
     "widened": "Nobody has answered yet, so we have widened the search.",
     "sort": "Sort",
     "byPrice": "Price",
@@ -42,7 +55,13 @@
     "away": "{{km}} km away",
     "warranty": "{{days}}-day warranty",
     "noWarranty": "no warranty",
-    "choose": "Choose this one"
+    "choose": "Choose this one",
+    "noOffers": "Nobody had it today.",
+    "noSupply": "No yard near you breaks this vehicle.",
+    "expired": "This request closed without a choice.",
+    "cancelled": "You cancelled this request.",
+    "endedHint": "Nothing has been charged. We have logged what you were looking for — if it comes in, we will tell you.",
+    "postAgain": "Post it again"
   },
   "accept": {
     "title": "Confirm and pay",
@@ -65,7 +84,7 @@
     "remaining": "{{minutes}} min remaining",
     "confirm": "CONFIRM IT ARRIVED",
     "problem": "Report a problem",
-    "autoConfirm": "This confirms automatically after 24 hours."
+    "autoConfirm": "This confirms automatically after {{hours}} hours."
   },
   "problem": {
     "title": "What went wrong?",
@@ -76,7 +95,22 @@
     "detail": "Tell us what happened",
     "submit": "Open a case"
   },
-  "history": { "title": "Your requests", "empty": "No requests yet.", "reorder": "Order again", "outcome": "Outcome" },
-  "nav": { "new": "New", "history": "History", "account": "Account" },
-  "errors": { "generic": "Something went wrong. Try again.", "network": "No connection.", "required": "Please fill this in.", "location": "Set the delivery pin first.", "photo": "Add a photo of the part." }
+  "history": {
+    "title": "Your requests",
+    "empty": "No requests yet.",
+    "reorder": "Order again",
+    "outcome": "Outcome"
+  },
+  "nav": {
+    "new": "New",
+    "history": "History",
+    "account": "Account"
+  },
+  "errors": {
+    "generic": "Something went wrong. Try again.",
+    "network": "No connection.",
+    "required": "Please fill this in.",
+    "location": "Set the delivery pin first.",
+    "photo": "Add a photo of the part."
+  }
 }

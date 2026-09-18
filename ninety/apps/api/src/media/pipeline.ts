@@ -59,7 +59,11 @@ export async function ingestMedia(body: Buffer, opts: IngestOptions): Promise<In
   const contentType = opts.contentType.split(';')[0]!.trim().toLowerCase();
 
   if (ALLOWED_VIDEO_TYPES.has(contentType)) {
-    if (body.byteLength > MAX_VIDEO_BYTES) throw new AppError('validation_failed', 'error.media_too_large');
+    if (body.byteLength > MAX_VIDEO_BYTES) {
+      throw new AppError('validation_failed', 'error.media_too_large', {
+        params: { megabytes: Math.round(MAX_VIDEO_BYTES / 1_000_000) },
+      });
+    }
     // Video is stored as supplied. Re-encoding video in-process would block the
     // event loop for seconds; the transcode-and-strip worker is a Phase 2 item
     // and until it exists video is accepted only from buyers, whose identity the
@@ -71,7 +75,11 @@ export async function ingestMedia(body: Buffer, opts: IngestOptions): Promise<In
   if (!ALLOWED_IMAGE_TYPES.has(contentType)) {
     throw new AppError('validation_failed', 'error.media_type_not_allowed');
   }
-  if (body.byteLength > MAX_IMAGE_BYTES) throw new AppError('validation_failed', 'error.media_too_large');
+  if (body.byteLength > MAX_IMAGE_BYTES) {
+    throw new AppError('validation_failed', 'error.media_too_large', {
+      params: { megabytes: Math.round(MAX_IMAGE_BYTES / 1_000_000) },
+    });
+  }
 
   let metadata: sharp.Metadata;
   try {

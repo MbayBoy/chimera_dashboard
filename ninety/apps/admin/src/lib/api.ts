@@ -212,7 +212,7 @@ export interface MarketRow {
   readonly paymentProvider: string;
   readonly courierProviders: string[];
   readonly tax: { rate: number; label: string; inclusive: boolean };
-  readonly sla: { responseMin: number; offersMin: number; deliveryMin: number };
+  readonly sla: { responseMin: number; offersMin: number; deliveryMin: number; deliveryPeakMin: number };
   readonly fees: { commissionRate: number; buyerFeeRate: number; deliveryMarkupRate: number };
   readonly isLive: boolean;
 }

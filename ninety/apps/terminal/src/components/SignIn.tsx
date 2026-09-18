@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { OTP_CODE_LENGTH } from '@ninety/shared';
 import { apiFetch, ApiError, fetchMe, saveSession, type MarketSummary, type Session } from '../lib/api.js';
 import { localeFor, translate, type Language } from '../lib/i18n.js';
 
@@ -137,7 +138,7 @@ export function SignIn({
             {devCode !== null && <div className="banner banner-warn">dev code: {devCode}</div>}
             <div className="field">
               <label className="field-label" htmlFor="code">
-                {t('signin.code', { digits: 6 })}
+                {t('signin.code', { digits: OTP_CODE_LENGTH })}
               </label>
               <input
                 id="code"
@@ -145,7 +146,7 @@ export function SignIn({
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                maxLength={6}
+                maxLength={OTP_CODE_LENGTH}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
               />

@@ -22,7 +22,13 @@ export interface MarketConfig {
   readonly paymentProvider: string;
   readonly courierProviders: readonly string[];
   readonly tax: { readonly rate: number; readonly label: string; readonly inclusive: boolean };
-  readonly sla: { readonly responseMin: number; readonly offersMin: number; readonly deliveryMin: number };
+  readonly sla: {
+    readonly responseMin: number;
+    readonly offersMin: number;
+    readonly deliveryMin: number;
+    /** The honest upper bound quoted in the public promise, in peak traffic. */
+    readonly deliveryPeakMin: number;
+  };
   readonly fees: {
     readonly commissionRate: number;
     readonly buyerFeeRate: number;

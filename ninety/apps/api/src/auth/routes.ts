@@ -186,6 +186,9 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
         timezone: market.timezone,
         vehicleIdentifier: market.vehicleIdentifier,
         sla: market.sla,
+        // The windows a client has to state out loud: how long a buyer has to
+        // choose, and how long before a delivery confirms itself.
+        windows: await marketConfig.windows(market.id),
         addressModel: market.addressModel,
         isLive: market.isLive,
       },

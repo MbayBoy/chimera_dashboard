@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { checkParity, loadCatalogues, REFERENCE_LANGUAGE } from './locales.js';
-import { catalogueDir } from './paths.js';
+import { checkParity, findHardcodedNumbers, loadCatalogues, REFERENCE_LANGUAGE } from './locales.js';
+import { allCatalogueDirs, catalogueDir } from './paths.js';
 
 /**
  * Arabic is a launch requirement, not a later addition. A key that exists in
@@ -40,4 +40,18 @@ describe('locale catalogue parity', () => {
     }
     expect(failures).toEqual([]);
   });
+});
+
+describe('no number is written into a translated sentence', () => {
+  for (const { name, dir } of allCatalogueDirs()) {
+    it(`${name}: every number is a parameter, in both languages`, () => {
+      const set = loadCatalogues(dir);
+      expect(set.languages.length, `${name} has no catalogues at ${dir}`).toBeGreaterThan(1);
+      const offenders = findHardcodedNumbers(set);
+      expect(
+        offenders.map((o) => `${o.language}:${o.key} = ${o.value}`),
+        'a number in a message is a parameter — the code that knows what it is passes it in',
+      ).toEqual([]);
+    });
+  }
 });

@@ -28,3 +28,13 @@ export function anonLabelForIndex(index: number): string {
   const second = index % letters.length;
   return `${letters[first]!}${letters[second]!}`;
 }
+
+/**
+ * The length of a one-time code.
+ *
+ * Here rather than in each client because three places were quoting it: the
+ * generator, the input that limits what can be typed, and the sentence telling
+ * the operator what to expect. Two of the three had it as a literal, and a
+ * change to the third would have left them wrong.
+ */
+export const OTP_CODE_LENGTH = 6;

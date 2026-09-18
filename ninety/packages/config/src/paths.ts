@@ -28,3 +28,18 @@ export function guardedRoots(root = repoRoot()): string[] {
 export function catalogueDir(root = repoRoot()): string {
   return join(root, 'apps', 'api', 'src', 'i18n', 'catalogues');
 }
+
+/**
+ * Every catalogue in the product, not only the API's.
+ *
+ * The terminal and the buyer app carry their own, and they are the ones a
+ * supplier and a buyer actually read. A parity or numbering rule enforced on
+ * one catalogue and not the others is enforced on the least-read of the three.
+ */
+export function allCatalogueDirs(root = repoRoot()): { name: string; dir: string }[] {
+  return [
+    { name: 'api', dir: catalogueDir(root) },
+    { name: 'terminal', dir: join(root, 'apps', 'terminal', 'src', 'locales') },
+    { name: 'buyer', dir: join(root, 'apps', 'buyer', 'src', 'locales') },
+  ];
+}

@@ -160,4 +160,13 @@ never exercised by a second case is not an abstraction.
 - `docs/GATE-EVIDENCE.md` — what each phase gate demonstrated, and what could not
   be demonstrated in this environment
 - `docs/DECISIONS.md` — choices made, and what was deliberately left out
-- `docs/RUNBOOK.md` — operating the platform
+- `docs/RUNBOOK.md` — operating the platform, and the two things it cannot do for you
+- `docs/UNHAPPY-PATHS.md` — every unhappy path with its user-facing copy in both
+  launch languages. Generated from the shipping catalogues by
+  `node scripts/generate-unhappy-paths.mjs`, so it cannot drift from the product
+- `docs/SECURITY-AND-COMPLIANCE.md` — lawful basis, retention, the deletion path,
+  PCI scope, KYC, and the stolen-parts policy and law-enforcement process
+- `docs/DRESS-REHEARSAL.md` — a step-by-step rehearsal a non-technical person can
+  run with twenty yards, reusable unchanged for the South African launch
+- `docs/screenshots/rtl-pass/` — every terminal screen in Arabic RTL and English,
+  at tablet and phone width, including the error, empty and offline states
