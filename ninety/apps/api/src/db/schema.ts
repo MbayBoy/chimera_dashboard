@@ -51,6 +51,8 @@ export const markets = pgTable('markets', {
   selectionWindowMin: integer('selection_window_min').notNull(),
   wideningWindowMin: integer('widening_window_min').notNull(),
   autoConfirmHours: integer('auto_confirm_hours').notNull(),
+  /** Years a completed sale's financial record is kept, whatever else is erased. */
+  financialRetentionYears: integer('financial_retention_years').notNull(),
   addressModel: text('address_model').notNull(),
   weekendDays: integer('weekend_days').array().notNull(),
   holidays: date('holidays').array().notNull(),
@@ -540,6 +542,7 @@ export const dataDeletionRequests = pgTable('data_deletion_requests', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid('user_id').notNull(),
   requestedBy: uuid('requested_by'),
+  executedBy: uuid('executed_by'),
   reason: text('reason'),
   status: text('status').notNull().default('pending'),
   completedAt: timestamp('completed_at', { withTimezone: true }),

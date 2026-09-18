@@ -21,6 +21,7 @@ import { scheduleTimer, cancelTimer } from '../timers/queue.js';
 import { notify, userIdForBuyer, userIdForSupplier } from '../notifications/service.js';
 import { buyerConnections } from '../realtime/hub.js';
 import { captureForOrder, voidAuthorisationForOrder } from '../payments/service.js';
+import { slaDeadline } from '../core/clock.js';
 
 /**
  * Logistics.
@@ -228,7 +229,7 @@ export async function dispatchForOrder(orderId: string, attempt = 1): Promise<vo
     .returning({ id: deliveries.id });
   const deliveryId = inserted[0]!.id;
 
-  const deliveryDeadline = addMinutes(request.acceptedAt ?? now, market.sla.deliveryMin);
+  const deliveryDeadline = slaDeadline(request.acceptedAt ?? now, market.sla.deliveryMin);
   await db.update(orders).set({ courierCostCents: best.priceCents }).where(eq(orders.id, orderId));
   await transitionIfStillIn(order.requestId, [RequestState.PAYMENT_HELD], 'COURIER_BOOKED', {
     actorType: 'system',
@@ -237,7 +238,7 @@ export async function dispatchForOrder(orderId: string, attempt = 1): Promise<vo
   });
 
   // Five minutes without a driver and we move on. Provider failure is routine.
-  const failoverAt = addMinutes(now, NO_DRIVER_TIMEOUT_MINUTES);
+  const failoverAt = slaDeadline(now, NO_DRIVER_TIMEOUT_MINUTES);
   await scheduleTimer(
     {
       kind: 'courier-no-driver',
@@ -365,7 +366,7 @@ export async function markDelivered(deliveryId: string, proofUrl: string | null,
 
   const request = (await db.select().from(requests).where(eq(requests.id, order.requestId)).limit(1))[0]!;
   const windows = await marketConfig.windows(request.marketId);
-  const autoConfirmAt = addMinutes(now, windows.autoConfirmHours * 60);
+  const autoConfirmAt = slaDeadline(now, windows.autoConfirmHours * 60);
   await scheduleTimer(
     {
       kind: 'auto-confirm',

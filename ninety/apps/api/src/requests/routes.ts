@@ -4,7 +4,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { LIVE_STATES, RequestState, toIsoUtc } from '@ninety/shared';
 import { authenticate, requireRole, withBuyerProfile } from '../auth/guards.js';
 import { getDb, getSql } from '../db/client.js';
-import { partCategories, requests, requestMedia, vehicles } from '../db/schema.js';
+import { orders, partCategories, requests, requestMedia, vehicles } from '../db/schema.js';
 import { AppError } from '../core/errors.js';
 import { createRequest, requestCounts } from './service.js';
 import { transition } from '../state/machine.js';
@@ -171,12 +171,39 @@ export async function registerRequestRoutes(app: FastifyInstance): Promise<void>
     )[0];
     if (!owned) throw new AppError('not_found', 'error.not_found');
 
+    // Void FIRST, then transition.
+    //
+    // A cancellation that changes the state and leaves the authorisation on the
+    // card is the worst version of this path: the buyer has cancelled, sees the
+    // request closed, and their money is still ring-fenced for a week. Doing it
+    // in this order means a failure to void leaves the request open and visible
+    // rather than closed and wrong.
+    const { voidAuthorisationForOrder } = await import('../payments/service.js');
+    const held = (
+      await getDb()
+        .select({ id: orders.id, status: orders.status })
+        .from(orders)
+        .where(eq(orders.requestId, params.id))
+        .orderBy(desc(orders.createdAt))
+        .limit(1)
+    )[0];
+    if (held !== undefined) {
+      await voidAuthorisationForOrder(held.id, body.reason ?? 'cancelled by buyer');
+    }
+
     const result = await transition(params.id, 'BUYER_CANCELS', {
       actorType: 'buyer',
       actorId: buyerId,
       reason: body.reason ?? 'cancelled by buyer',
     });
-    return reply.send({ status: result.to, outcome: result.outcome });
+
+    // Which message the buyer gets depends on how far the job had gone. Being
+    // told "the hold is released" when a driver already has the part in a van is
+    // not true, and they will find out.
+    const { notifyBuyerUnhappyPath } = await import('./notify-cancel.js');
+    await notifyBuyerUnhappyPath(params.id, result.from);
+
+    return reply.send({ status: result.to, outcome: result.outcome, authorisationVoided: held !== undefined });
   });
 
   /**

@@ -16,7 +16,8 @@
     "lint": "eslint src tests --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "loadtest": "tsx src/testing/loadtest.ts"
+    "loadtest": "tsx src/testing/loadtest.ts",
+    "seed:load": "tsx src/testing/seed-load.ts"
   },
   "dependencies": {
     "@fastify/cors": "10.0.1",

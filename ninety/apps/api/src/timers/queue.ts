@@ -1,6 +1,5 @@
 import { Queue, Worker, type Job, type JobsOptions } from 'bullmq';
 import { makeQueueConnection } from '../core/redis.js';
-import { env } from '../env.js';
 import { key } from '../core/keys.js';
 import { log } from '../core/logger.js';
 
@@ -71,7 +70,10 @@ export function getTimerQueue(): Queue<TimerPayload> {
  */
 export async function scheduleTimer(payload: TimerPayload, fireAt: Date): Promise<string> {
   const jobId = timerJobId(payload);
-  const delayMs = Math.max(0, fireAt.getTime() - Date.now()) / env().TIMER_SPEED_FACTOR;
+  // No speed factor here. The compression lives in core/clock.ts, applied to
+  // the deadline itself, so the timer fires at the moment the API published
+  // rather than at some private multiple of it.
+  const delayMs = Math.max(0, fireAt.getTime() - Date.now());
 
   const q = getTimerQueue();
   // Remove any existing job with this id first: BullMQ keeps the original delay
@@ -106,6 +108,16 @@ export const MATCHING_QUEUE = 'matching';
 
 export interface MatchingPayload {
   readonly requestId: string;
+  /**
+   * Tier 1 is the fan-out at submission; tier 2 is the widening at T+15.
+   *
+   * Widening runs on this queue rather than inside the timer job on purpose. A
+   * timer job's only obligation is to honour the deadline — transition the
+   * request and arm the next one. Doing the tier-2 geo query and several
+   * hundred fan-out rows inline holds a timer worker for as long as that takes,
+   * and every other deadline due in the same second waits behind it.
+   */
+  readonly tier?: 1 | 2;
 }
 
 let matchingQueue: Queue<MatchingPayload> | null = null;

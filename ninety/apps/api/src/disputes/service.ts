@@ -5,7 +5,7 @@ import { disputes, orders, requests, users } from '../db/schema.js';
 import { AppError } from '../core/errors.js';
 import { log } from '../core/logger.js';
 import { transitionIfStillIn } from '../state/machine.js';
-import { refundOrder } from '../payments/service.js';
+import { settleDisputedOrder } from '../payments/service.js';
 import { recordScoreEvent } from '../matching/scoring.js';
 import { notify, userIdForBuyer, userIdForSupplier } from '../notifications/service.js';
 
@@ -63,8 +63,10 @@ export async function resolveDispute(disputeId: string, input: ResolveInput): Pr
         ? Math.min(input.refundCents, order.totalCents)
         : 0;
 
+  // Expressed as what the buyer ends up paying, because the money may be
+  // captured or merely authorised and the two need different instruments.
   if (refundCents > 0) {
-    await refundOrder(order.id, refundCents, `dispute ${disputeId}: ${input.resolution}`);
+    await settleDisputedOrder(order.id, order.totalCents - refundCents, `dispute ${disputeId}: ${input.resolution}`);
   }
 
   await db

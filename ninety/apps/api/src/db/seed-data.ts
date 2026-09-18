@@ -35,6 +35,8 @@ export interface MarketSeed {
   selectionWindowMin: number;
   wideningWindowMin: number;
   autoConfirmHours: number;
+  /** Years the financial record of a completed sale is kept, whatever else is erased. */
+  financialRetentionYears: number;
   addressModel: 'street' | 'makani' | 'hybrid';
   weekendDays: number[];
   isLive: boolean;
@@ -71,6 +73,7 @@ export const MARKETS: MarketSeed[] = [
     selectionWindowMin: 120,
     wideningWindowMin: 45,
     autoConfirmHours: 24,
+    financialRetentionYears: 5,
     // Street addressing is weak and Makani numbers and map pins are how people
     // actually navigate, so a delivery location is a pin and never typed text.
     addressModel: 'makani',
@@ -104,6 +107,7 @@ export const MARKETS: MarketSeed[] = [
     selectionWindowMin: 120,
     wideningWindowMin: 45,
     autoConfirmHours: 24,
+    financialRetentionYears: 5,
     addressModel: 'street',
     weekendDays: [6, 0],
     isLive: false,

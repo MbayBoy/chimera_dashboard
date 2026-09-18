@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import {
   findContactDetails,
-  normaliseDigits,
   OfferStatus,
   parseAmountToMinorUnits,
   RequestState,

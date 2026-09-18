@@ -17,12 +17,14 @@ import { getDb, getSql } from '../db/client.js';
 import { requests } from '../db/schema.js';
 import { log } from '../core/logger.js';
 import { key } from '../core/keys.js';
+import { env } from '../env.js';
 import {
   onOffersDeadline,
   onResponseDeadline,
   onSelectionDeadline,
   onWideningDeadline,
   runMatching,
+  runWidening,
 } from '../matching/hooks.js';
 
 /**
@@ -106,7 +108,7 @@ export async function startTimerWorkers(): Promise<void> {
   worker = new Worker<TimerPayload>(TIMER_QUEUE, handleTimer, {
     connection: makeQueueConnection(),
     prefix: key('bull'),
-    concurrency: 20,
+    concurrency: env().TIMER_CONCURRENCY,
   });
   worker.on('failed', (job, err) => {
     log.error('timer job failed', { jobId: job?.id, kind: job?.data.kind, requestId: job?.data.requestId, err: err.message });
@@ -115,9 +117,13 @@ export async function startTimerWorkers(): Promise<void> {
   matchingWorker = new Worker<MatchingPayload>(
     MATCHING_QUEUE,
     async (job) => {
+      if (job.data.tier === 2) {
+        await runWidening(job.data.requestId);
+        return;
+      }
       await runMatching(job.data.requestId);
     },
-    { connection: makeQueueConnection(), prefix: key('bull'), concurrency: 20 },
+    { connection: makeQueueConnection(), prefix: key('bull'), concurrency: env().TIMER_CONCURRENCY },
   );
   matchingWorker.on('failed', (job, err) => {
     log.error('matching job failed', { jobId: job?.id, requestId: job?.data.requestId, err: err.message });

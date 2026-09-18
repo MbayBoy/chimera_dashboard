@@ -45,7 +45,9 @@ function makeSql(url: string, max: number) {
 }
 
 export function getSql(): Sql {
-  if (sqlClient === null) sqlClient = makeSql(env().DATABASE_URL, env().NODE_ENV === 'test' ? 5 : 20);
+  if (sqlClient === null) {
+    sqlClient = makeSql(env().DATABASE_URL, env().NODE_ENV === 'test' ? 5 : env().DATABASE_POOL_MAX);
+  }
   return sqlClient;
 }
 

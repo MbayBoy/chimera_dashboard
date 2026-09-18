@@ -4,7 +4,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { toIsoUtc } from '@ninety/shared';
 import { authenticate, requireRole, withBuyerProfile } from '../auth/guards.js';
 import { getDb } from '../db/client.js';
-import { deliveries, orders, requests } from '../db/schema.js';
+import { orders, requests } from '../db/schema.js';
 import { AppError } from '../core/errors.js';
 import { confirmReceipt } from '../logistics/service.js';
 import { t } from '../i18n/index.js';

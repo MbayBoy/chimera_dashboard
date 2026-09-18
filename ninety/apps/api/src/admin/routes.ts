@@ -1,13 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { LIVE_STATES, RequestState, RequestTransition, toIsoUtc } from '@ninety/shared';
 import { authenticate, requireRole } from '../auth/guards.js';
 import { getDb, getSql } from '../db/client.js';
 import {
   adminInterventions,
   disputes,
-  matchDecisions,
   opsQueue,
   orders,
   requests,
@@ -28,6 +27,7 @@ import {
 import { logIdentityAccess } from '../security/audit.js';
 import { log } from '../core/logger.js';
 import { t } from '../i18n/index.js';
+import { slaDeadline } from '../core/clock.js';
 
 /**
  * The ops console API.
@@ -223,7 +223,7 @@ export async function registerAdminRoutes(app: FastifyInstance): Promise<void> {
         const sent = await sendFanout(params.id, result.selected, {
           tier,
           reference: request.reference,
-          responseDeadline: request.responseDeadline ?? new Date(Date.now() + market.sla.responseMin * 60_000),
+          responseDeadline: request.responseDeadline ?? slaDeadline(new Date(), market.sla.responseMin),
           summary: { part: request.partDescription, minutes: market.sla.responseMin },
         });
         outcome = { considered: result.considered, selected: result.selected.length, sent };

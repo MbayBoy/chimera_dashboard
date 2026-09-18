@@ -20,6 +20,7 @@ import { registerWebhookRoutes } from './payments/webhooks.js';
 import { registerDeliveryRoutes } from './logistics/routes.js';
 import { registerDisputeRoutes } from './disputes/routes.js';
 import { registerAdminRoutes } from './admin/routes.js';
+import { registerPrivacyRoutes } from './privacy/routes.js';
 import { registerRealtimeRoutes } from './realtime/routes.js';
 import { getRedis } from './core/redis.js';
 import { key } from './core/keys.js';
@@ -92,6 +93,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await registerDisputeRoutes(app);
   await registerSupplierRoutes(app);
   await registerAdminRoutes(app);
+  await registerPrivacyRoutes(app);
   await registerRealtimeRoutes(app);
 
   // Structured access log with the request id on every line.

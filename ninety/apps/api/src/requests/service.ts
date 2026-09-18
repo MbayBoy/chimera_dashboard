@@ -83,7 +83,6 @@ export function dedupeHash(input: {
 }
 
 export async function createRequest(input: CreateRequestInput): Promise<CreatedRequest> {
-  const db = getDb();
   const market = input.market;
 
   if (!market.isLive) throw new AppError('market_not_live', 'error.market_not_live');

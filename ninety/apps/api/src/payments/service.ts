@@ -1,6 +1,5 @@
 import { and, desc, eq } from 'drizzle-orm';
 import {
-  addMinutes,
   OfferStatus,
   OrderStatus,
   ORDER_REFERENCE_PREFIX,
@@ -21,6 +20,7 @@ import { scheduleTimer, cancelTimer } from '../timers/queue.js';
 import { notify, userIdForBuyer, userIdForSupplier } from '../notifications/service.js';
 import { supplierConnections, buyerConnections } from '../realtime/hub.js';
 import { recordScoreEvent } from '../matching/scoring.js';
+import { slaDeadline } from '../core/clock.js';
 
 /**
  * The money path.
@@ -179,7 +179,7 @@ export async function acceptOfferAndAuthorise(input: AcceptOfferInput): Promise<
   });
 
   // Anything still authorised after two days means something is stuck.
-  const staleAt = addMinutes(new Date(), AUTHORISATION_STALE_HOURS * 60);
+  const staleAt = slaDeadline(new Date(), AUTHORISATION_STALE_HOURS * 60);
   await scheduleTimer(
     { kind: 'authorisation-stale', requestId: input.requestId, orderId, expectedStates: [], dueAt: toIsoUtc(staleAt) },
     staleAt,
@@ -393,6 +393,81 @@ export async function refundOrder(orderId: string, amountCents: Cents, reason: s
  * Not an error in itself — it means a delivery is stuck, which is an operational
  * problem someone needs to see before the seven-day window closes on its own.
  */
+/**
+ * Settle a disputed order, whatever state its money is in.
+ *
+ * A dispute is usually raised INSTEAD of confirming receipt, which means the
+ * card has been authorised and never captured. There is nothing to refund at
+ * that point, and the first version of this path threw an illegal-transition
+ * error at the admin trying to resolve it — the buyer's complaint would have
+ * been stuck behind a payments technicality.
+ *
+ * So the outcome is expressed as "what the buyer ends up paying", and the route
+ * to it depends on where the money already is:
+ *
+ *   captured  →  refund the difference
+ *   authorised, buyer pays nothing  →  void the hold
+ *   authorised, buyer pays something  →  capture that amount and no more
+ *
+ * Money only ever moves in one direction per order, and the total the buyer is
+ * charged is the number the admin decided, in minor units, in every branch.
+ */
+export async function settleDisputedOrder(
+  orderId: string,
+  buyerPaysCents: Cents,
+  reason: string,
+): Promise<{ refundedCents: Cents; capturedCents: Cents; voided: boolean }> {
+  const db = getDb();
+  const order = (await db.select().from(orders).where(eq(orders.id, orderId)).limit(1))[0];
+  if (!order) throw new AppError('not_found', 'error.not_found');
+
+  const pays = Math.max(0, Math.min(buyerPaysCents, order.totalCents));
+
+  if (order.status === OrderStatus.CAPTURED) {
+    const refund = order.totalCents - pays;
+    if (refund > 0) await refundOrder(orderId, refund, reason);
+    return { refundedCents: refund, capturedCents: pays, voided: false };
+  }
+
+  if (order.status !== OrderStatus.AUTHORISED) {
+    // Already voided or cancelled: the buyer has been charged nothing and there
+    // is nothing left to move. Reporting that honestly beats throwing.
+    return { refundedCents: 0, capturedCents: 0, voided: order.status === OrderStatus.VOIDED };
+  }
+
+  if (pays === 0) {
+    await voidAuthorisationForOrder(orderId, reason);
+    return { refundedCents: order.totalCents, capturedCents: 0, voided: true };
+  }
+
+  const authorisation = await latestPayment(orderId, 'authorisation');
+  if (authorisation === null) throw new AppError('internal_error', 'error.internal');
+  const request = (await db.select().from(requests).where(eq(requests.id, order.requestId)).limit(1))[0]!;
+  const market = await marketConfig.byId(request.marketId);
+  const provider = getPaymentProvider(market.paymentProvider);
+
+  const capture = await provider.capture(authorisation.providerRef, pays, `capture:dispute:${orderId}`);
+  await db.insert(payments).values({
+    orderId,
+    provider: provider.name,
+    providerRef: capture.providerRef,
+    intent: 'capture',
+    amountCents: capture.amountCents,
+    status: 'captured',
+    raw: capture.raw as never,
+  });
+  await db.update(orders).set({ status: OrderStatus.CAPTURED, capturedAt: new Date() }).where(eq(orders.id, orderId));
+  await cancelTimer({ kind: 'authorisation-stale', requestId: order.requestId });
+
+  log.info('disputed order settled by partial capture', {
+    orderId,
+    authorisedCents: order.totalCents,
+    capturedCents: pays,
+    reason,
+  });
+  return { refundedCents: order.totalCents - pays, capturedCents: pays, voided: false };
+}
+
 export async function onStaleAuthorisation(orderId: string): Promise<void> {
   const order = (await getDb().select().from(orders).where(eq(orders.id, orderId)).limit(1))[0];
   if (!order || order.status !== OrderStatus.AUTHORISED) return;

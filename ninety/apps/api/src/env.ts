@@ -67,6 +67,17 @@ const schema = z.object({
 
   /** Compresses long waits in tests: 1 means real time. */
   TIMER_SPEED_FACTOR: z.coerce.number().positive().default(1),
+
+  /**
+   * Database connections and timer workers, sized together on purpose.
+   *
+   * Every timer job holds a connection for the length of its work, so a worker
+   * concurrency above the pool size buys nothing but queueing inside the pool.
+   * Both are here rather than in code because the right numbers depend on the
+   * database the deployment actually has, which the code cannot know.
+   */
+  DATABASE_POOL_MAX: z.coerce.number().int().positive().default(20),
+  TIMER_CONCURRENCY: z.coerce.number().int().positive().default(20),
 });
 
 export type Env = z.infer<typeof schema>;

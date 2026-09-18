@@ -1,14 +1,15 @@
 import { eq } from 'drizzle-orm';
-import { addMinutes, RequestState, toIsoUtc } from '@ninety/shared';
+import { RequestState, toIsoUtc } from '@ninety/shared';
 import { getDb, getSql } from '../db/client.js';
 import { requests } from '../db/schema.js';
 import { marketConfig } from '../market/config.js';
 import { transition, transitionIfStillIn } from '../state/machine.js';
 import { selectSuppliers, sendFanout } from './engine.js';
-import { scheduleTimer, cancelTimer } from '../timers/queue.js';
+import { getMatchingQueue, scheduleTimer, cancelTimer } from '../timers/queue.js';
 import { notify, userIdForBuyer } from '../notifications/service.js';
 import { buyerConnections } from '../realtime/hub.js';
 import { log } from '../core/logger.js';
+import { slaDeadline } from '../core/clock.js';
 
 /**
  * Orchestration.
@@ -43,8 +44,8 @@ export async function runMatching(requestId: string): Promise<void> {
   }
 
   const now = new Date();
-  const responseDeadline = addMinutes(now, market.sla.responseMin);
-  const offersDeadline = addMinutes(now, market.sla.offersMin);
+  const responseDeadline = slaDeadline(now, market.sla.responseMin);
+  const offersDeadline = slaDeadline(now, market.sla.offersMin);
 
   const summary = await fanoutSummary(requestId, market.sla.responseMin);
   await sendFanout(requestId, result.selected, {
@@ -91,20 +92,21 @@ export async function onResponseDeadline(requestId: string): Promise<void> {
   const offerCount = await liveOfferCount(requestId);
   const market = await marketConfig.byId(request.marketId);
 
-  // Yards that never answered. Those whose terminal was offline the whole time
-  // are marked unreachable instead: they did not miss the job, they never got it.
-  await markNonResponders(requestId);
-
   if (offerCount > 0) {
     await transitionIfStillIn(requestId, [RequestState.AWAITING_OFFERS], 'RESPONSE_WINDOW_CLOSED_WITH_OFFERS', {
       actorType: 'timer',
       reason: `${offerCount} offers at the response deadline`,
     });
+    // Scoring after the transition, deliberately. A deadline's first duty is the
+    // state change the buyer is watching for; writing a score event per
+    // non-responding yard first put several hundred milliseconds of bookkeeping
+    // in front of it, and every other deadline due in the same second waited.
+    await markNonResponders(requestId);
     return;
   }
 
   const windows = await marketConfig.windows(request.marketId);
-  const wideningDeadline = addMinutes(new Date(), windows.wideningWindowMin - market.sla.responseMin);
+  const wideningDeadline = slaDeadline(new Date(), windows.wideningWindowMin - market.sla.responseMin);
 
   await transitionIfStillIn(requestId, [RequestState.AWAITING_OFFERS], 'RESPONSE_WINDOW_CLOSED_WITHOUT_OFFERS', {
     actorType: 'timer',
@@ -112,14 +114,9 @@ export async function onResponseDeadline(requestId: string): Promise<void> {
     patch: { wideningDeadline },
   });
 
-  const result = await selectSuppliers(requestId, { tier: 2, market });
-  const summary = await fanoutSummary(requestId, windows.wideningWindowMin - market.sla.responseMin);
-  const sent = await sendFanout(requestId, result.selected, {
-    tier: 2,
-    reference: request.reference,
-    responseDeadline: wideningDeadline,
-    summary,
-  });
+  // Yards that never answered. Those whose terminal was offline the whole time
+  // are marked unreachable instead: they did not miss the job, they never got it.
+  await markNonResponders(requestId);
 
   await scheduleTimer(
     { kind: 'widening-deadline', requestId, expectedStates: [RequestState.WIDENING], dueAt: toIsoUtc(wideningDeadline) },
@@ -135,6 +132,37 @@ export async function onResponseDeadline(requestId: string): Promise<void> {
     type: 'search_widened',
     requestId,
     wideningDeadline: toIsoUtc(wideningDeadline),
+  });
+
+  // The fan-out itself goes on the matching queue. The buyer has already been
+  // told and the next deadline is already armed, so nothing the buyer can see
+  // waits for the geo query — and no other request's deadline waits behind it.
+  await enqueueWidening(requestId);
+}
+
+/**
+ * The tier-2 fan-out, off the timer worker.
+ *
+ * Safe to run twice: the request must still be in WIDENING, yards already sent
+ * the job in tier 1 are excluded by the engine, and the fan-out rows are
+ * inserted with ON CONFLICT DO NOTHING.
+ */
+export async function runWidening(requestId: string): Promise<void> {
+  const request = (await getDb().select().from(requests).where(eq(requests.id, requestId)).limit(1))[0];
+  if (!request || request.status !== RequestState.WIDENING) {
+    log.debug('widening skipped: request has moved on', { requestId, status: request?.status });
+    return;
+  }
+
+  const market = await marketConfig.byId(request.marketId);
+  const windows = await marketConfig.windows(request.marketId);
+  const result = await selectSuppliers(requestId, { tier: 2, market });
+  const summary = await fanoutSummary(requestId, windows.wideningWindowMin - market.sla.responseMin);
+  const sent = await sendFanout(requestId, result.selected, {
+    tier: 2,
+    reference: request.reference,
+    responseDeadline: request.wideningDeadline ?? slaDeadline(new Date(), windows.wideningWindowMin - market.sla.responseMin),
+    summary,
   });
 
   log.info('tier-2 widening fired', { requestId, additionalSuppliers: sent });
@@ -154,12 +182,12 @@ export async function onWideningDeadline(requestId: string): Promise<void> {
     return;
   }
 
-  await markNonResponders(requestId);
   await transitionIfStillIn(requestId, [RequestState.WIDENING], 'WIDENING_EXHAUSTED', {
     actorType: 'timer',
     reason: 'no offers after widening',
   });
   await transitionIfStillIn(requestId, [RequestState.NO_OFFERS], 'CLOSE', { actorType: 'timer' });
+  await markNonResponders(requestId);
 
   const fanouts = await getSql()<{ n: string }[]>`
     SELECT count(*)::text AS n FROM request_fanouts WHERE request_id = ${requestId}
@@ -178,7 +206,7 @@ export async function onOffersDeadline(requestId: string): Promise<void> {
   if (request.status !== RequestState.COLLECTING_OFFERS) return;
 
   const windows = await marketConfig.windows(request.marketId);
-  const selectionDeadline = addMinutes(new Date(), windows.selectionWindowMin);
+  const selectionDeadline = slaDeadline(new Date(), windows.selectionWindowMin);
   await getDb().update(requests).set({ selectionDeadline }).where(eq(requests.id, requestId));
 
   await scheduleTimer(
@@ -368,3 +396,8 @@ async function userIdForSupplier(supplierId: string): Promise<string | null> {
   return resolve(supplierId);
 }
 
+
+/** Enqueue the tier-2 fan-out. Idempotent by job id, like every other enqueue. */
+async function enqueueWidening(requestId: string): Promise<void> {
+  await getMatchingQueue().add('widen', { requestId, tier: 2 }, { jobId: `widen:${requestId}` });
+}
